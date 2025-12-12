@@ -14,11 +14,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // 1. Obtener el ID de la URL (el parámetro 'hoja' del QR)
-        // ESTO es lo que leerá el ID desde la URL de Google Sites: ?hoja=ID_AQUI
+        // Se usa window.location.search para obtener la parte de la URL que tiene los parámetros
         const urlParams = new URLSearchParams(window.location.search);
+        // Lee el valor del parámetro 'hoja'. Si está vacío, usa el ID por defecto.
         const hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO';
         
-        // Actualizar el display para el usuario
+        // Muestra el ID de la hoja en la página para el diagnóstico.
         document.getElementById('hojaDisplay').textContent = hojaID;
 
         // 2. Definir el Prompt (la instrucción larga para la IA)
@@ -26,9 +27,11 @@
 
         // 3. Reemplazar el placeholder por el ID real y codificar
         const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
+        
+        // ¡Crucial! Asegurar la codificación correcta del prompt para la URL
         const promptCodificado = encodeURIComponent(promptFinal);
 
-        // 4. Crear la URL de destino para Gemini
+        // 4. Crear la URL de destino final para Gemini
         const urlGemini = `https://gemini.google.com/chat?prompt=${promptCodificado}`;
 
         // 5. Asignar la acción al botón para lanzar Gemini
@@ -39,44 +42,11 @@
 </script>
 
 <style>
-    /* Estilos para que la página se vea bien en el móvil */
-    .container { 
-        font-family: Arial, sans-serif; 
-        text-align: center; 
-        padding: 20px; 
-        background-color: #f4f4f9; 
-        color: #333; 
-        max-width: 100%; 
-        border-radius: 10px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-    }
-    h1 { 
-        color: #1a73e8; 
-        font-size: 1.4em; 
-        margin-bottom: 8px; 
-    }
-    p { 
-        margin-bottom: 20px; 
-        line-height: 1.4; 
-        font-size: 0.95em;
-    }
-    #lanzarGemini {
-        background-color: #4285f4; 
-        color: white;
-        padding: 15px 20px;
-        border: none;
-        border-radius: 5px;
-        font-size: 1.05em;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    #lanzarGemini:hover { 
-        background-color: #3b78e7; 
-    }
-    .instruccion { 
-        margin-top: 15px; 
-        font-size: 0.8em; 
-        color: #666; 
-    }
+    /* Estilos omitidos por brevedad, pero debe incluir los estilos anteriores */
+    .container { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; color: #333; max-width: 100%; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h1 { color: #1a73e8; font-size: 1.4em; margin-bottom: 8px; }
+    p { margin-bottom: 20px; line-height: 1.4; font-size: 0.95em; }
+    #lanzarGemini { background-color: #4285f4; color: white; padding: 15px 20px; border: none; border-radius: 5px; font-size: 1.05em; cursor: pointer; transition: background-color 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    #lanzarGemini:hover { background-color: #3b78e7; }
+    .instruccion { margin-top: 15px; font-size: 0.8em; color: #666; }
 </style>
