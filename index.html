@@ -1,0 +1,82 @@
+<div class="container">
+    <h1>✨ Tu Contenido Cobra Vida ✨</h1>
+    <p>Hemos identificado tu hoja. Haz clic abajo para iniciar una conversación con nuestro Asistente Experto Gemini. ¡Recuerda usar la cámara una vez que inicie el chat!</p>
+    
+    <button id="lanzarGemini">
+        🤖 Iniciar Conversación con Gemini
+    </button>
+    
+    <p class="instruccion">
+        ID de la Hoja (para el Asistente): <span id="hojaDisplay">Cargando...</span>
+    </p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Obtener el ID de la URL (el parámetro 'hoja' del QR)
+        // ESTO es lo que leerá el ID desde la URL de Google Sites: ?hoja=ID_AQUI
+        const urlParams = new URLSearchParams(window.location.search);
+        const hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO';
+        
+        // Actualizar el display para el usuario
+        document.getElementById('hojaDisplay').textContent = hojaID;
+
+        // 2. Definir el Prompt (la instrucción larga para la IA)
+        const promptTemplate = "Hola Gemini. El usuario que ha iniciado esta conversación ha escaneado un código QR desde uno de nuestros productos, una hoja interactiva con el ID único: [ID_HOJA]. Tu rol es ser el Asistente Experto Multimodal sobre el contenido que el usuario te va a mostrar. Por favor, realiza lo siguiente: 1. Reconóceme: Da una bienvenida confirmando que has entendido el contexto: '¡Hola! Soy tu Asistente Experto para la hoja [ID_HOJA]. Estoy listo para ir más allá de lo que ves en el papel.' 2. Guía al Usuario: Instruye al usuario de forma clara sobre cómo usar la cámara para que te muestre la hoja: 'Por favor, usa el botón de la cámara 📷 y enfoca la hoja para que pueda ver el texto. Una vez que lo hagas, pregúntame lo que desees sobre él: resumir, buscar información relacionada, obtener ideas o formular preguntas específicas.' Tu objetivo es: Permitir cualquier interacción creativa que amplifique el contenido físico con la potencia de internet, sin limitarte a una sola función.";
+
+        // 3. Reemplazar el placeholder por el ID real y codificar
+        const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
+        const promptCodificado = encodeURIComponent(promptFinal);
+
+        // 4. Crear la URL de destino para Gemini
+        const urlGemini = `https://gemini.google.com/chat?prompt=${promptCodificado}`;
+
+        // 5. Asignar la acción al botón para lanzar Gemini
+        document.getElementById('lanzarGemini').onclick = function() {
+            window.location.href = urlGemini;
+        };
+    });
+</script>
+
+<style>
+    /* Estilos para que la página se vea bien en el móvil */
+    .container { 
+        font-family: Arial, sans-serif; 
+        text-align: center; 
+        padding: 20px; 
+        background-color: #f4f4f9; 
+        color: #333; 
+        max-width: 100%; 
+        border-radius: 10px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    }
+    h1 { 
+        color: #1a73e8; 
+        font-size: 1.4em; 
+        margin-bottom: 8px; 
+    }
+    p { 
+        margin-bottom: 20px; 
+        line-height: 1.4; 
+        font-size: 0.95em;
+    }
+    #lanzarGemini {
+        background-color: #4285f4; 
+        color: white;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.05em;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    #lanzarGemini:hover { 
+        background-color: #3b78e7; 
+    }
+    .instruccion { 
+        margin-top: 15px; 
+        font-size: 0.8em; 
+        color: #666; 
+    }
+</style>
