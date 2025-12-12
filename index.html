@@ -21,41 +21,31 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- INICIO: Lógica ultra-reforzada para leer el ID de la URL ---
-            let hojaID = 'ID-NO-ENCONTRADO';
             
-            // 1. Intentar leer el parámetro 'hoja' del querystring
+            // =========================================================
+            // 1. URL CORTA DE DESTINO FINAL (¡ESTA ES LA CLAVE!)
+            // Esta URL lleva el prompt largo de Gemini.
+            // =========================================================
+            const finalBitlyUrl = 'https://bit.ly/4pzUKTp'; 
+
+            // --- Lógica de Lectura del ID (Se mantiene solo para mostrar información, no afecta la redirección) ---
+            let hojaID = 'ID-UNICO-ESTATICO'; // Valor que se muestra
             const urlParams = new URLSearchParams(window.location.search);
-            hojaID = urlParams.get('hoja');
-
-            // 2. Si falla, usar fallback o valor predeterminado
-            if (!hojaID || hojaID === '') {
-                hojaID = 'ID-NO-ESPECIFICADO';
-            }
-            // --- FIN: Lógica de lectura de ID ---
-
-            // Mostrar el ID en la página para verificación
+            hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO'; 
+            
+            // Muestra el ID en la página (para su diagnóstico o información)
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // 3. Definir el Prompt (la instrucción larga para la IA)
-            const promptTemplate = "Hola Gemini. El usuario que ha iniciado esta conversación ha escaneado un código QR desde uno de nuestros productos, una hoja interactiva con el ID único: [ID_HOJA]. Tu rol es ser el Asistente Experto Multimodal sobre el contenido que el usuario te va a mostrar. Por favor, realiza lo siguiente: 1. Reconóceme: Da una bienvenida confirmando que has entendido el contexto: '¡Hola! Soy tu Asistente Experto para la hoja [ID_HOJA]. Estoy listo para ir más allá de lo que ves en el papel.' 2. Guía al Usuario: Instruye al usuario de forma clara sobre cómo usar la cámara para que te muestre la hoja: 'Por favor, usa el botón de la cámara 📷 y enfoca la hoja para que pueda ver el texto. Una vez que lo hagas, pregúntame lo que desees sobre él: resumir, buscar información relacionada, obtener ideas o formular preguntas específicas.' Tu objetivo es: Permitir cualquier interacción creativa que amplifique el contenido físico con la potencia de internet, sin limitarte a una sola función.";
-
-            // 4. Reemplazar el placeholder por el ID real y codificar la URL
-            const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
-            const promptCodificado = encodeURIComponent(promptFinal);
-
-            // 5. Crear la URL de destino final para Gemini
-            const urlGemini = `https://gemini.google.com/chat?prompt=${promptCodificado}`;
-
-            // 6. Asignar la acción al botón (Redirección con permiso del usuario)
+            // 2. Asignar la acción al botón: Siempre redirigir al Bit.ly
             document.getElementById('lanzarGemini').onclick = function() {
-                window.location.href = urlGemini;
+                // Redirige al Bit.ly, que luego lleva a la URL larga de Gemini con el prompt.
+                window.location.href = finalBitlyUrl;
             };
         });
     </script>
 
     <style>
-        /* Estilos base y Responsivos para Móviles */
+        /* Estilos CSS Responsivos (El mismo que le di para móviles) */
         body {
             background-color: #f0f2f5;
             padding: 0;
@@ -69,10 +59,10 @@
             font-family: Arial, sans-serif; 
             text-align: center; 
             padding: 20px; 
-            background-color: #ffffff; /* Fondo blanco */
+            background-color: #ffffff; 
             color: #333; 
-            max-width: 400px; /* Limita el ancho máximo */
-            width: 90%; /* Ocupa la mayor parte del ancho en móviles */
+            max-width: 400px; 
+            width: 90%; 
             margin: 0 auto;
             border-radius: 10px; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
@@ -87,7 +77,6 @@
             line-height: 1.5; 
             font-size: 1em;
         }
-        /* Estilo del Botón */
         #lanzarGemini {
             background-color: #4285f4; 
             color: white;
@@ -95,7 +84,7 @@
             border: none;
             border-radius: 8px; 
             font-size: 1.1em;
-            width: 100%; /* Ocupa todo el ancho disponible en el contenedor */
+            width: 100%; 
             cursor: pointer;
             transition: background-color 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
@@ -103,7 +92,6 @@
         #lanzarGemini:hover { 
             background-color: #3b78e7; 
         }
-        /* Estilo de la instrucción de ID (pequeña y discreta) */
         .instruccion { 
             margin-top: 25px; 
             font-size: 0.8em; 
@@ -112,7 +100,6 @@
             border-top: 1px solid #eee;
         }
 
-        /* Media Query para asegurar la estética en pantallas grandes */
         @media (min-width: 600px) {
             body {
                 background-color: #f0f2f5; 
