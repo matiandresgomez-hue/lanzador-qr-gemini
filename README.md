@@ -1,0 +1,1 @@
+# lanzador-qr-gemini
