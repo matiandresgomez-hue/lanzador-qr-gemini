@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente de Hoja Interactiva | Gemini</title>
+    <title>Prueba de Carga Automática | Gemini</title>
 </head>
 <body>
     <div class="container">
-        <h1>✨ Tu Contenido Cobra Vida ✨</h1>
-        <p>Hemos identificado tu hoja. Haz clic abajo para iniciar una conversación con nuestro Asistente Experto Gemini. ¡Recuerda usar la cámara para mostrar el papel!</p>
+        <h1>🧪 Prueba de Carga Automática 🧪</h1>
+        <p>Haga clic en el botón. Si el prompt se carga automáticamente en el chat de Gemini, ¡el sistema funciona! Si no, confirme que la URL en el navegador cambió a la versión larga.</p>
         
         <button id="lanzarGemini">
-            🤖 Iniciar Conversación con Gemini
+            🚀 Iniciar Prueba con Prompt
         </button>
         
         <p class="instruccion">
-            ID de la Hoja (para el Asistente): <span id="hojaDisplay">Cargando...</span>
+            URL de Destino: https://bit.ly/4pzUKTp
         </p>
     </div>
     
@@ -23,88 +23,29 @@
         document.addEventListener('DOMContentLoaded', () => {
             
             // =========================================================
-            // 1. URL CORTA DE DESTINO FINAL (¡ESTA ES LA CLAVE!)
-            // Esta URL lleva el prompt largo de Gemini.
+            // URL CORTA DE DESTINO FINAL (¡SU ENLACE BIT.LY!)
             // =========================================================
             const finalBitlyUrl = 'https://bit.ly/4pzUKTp'; 
-
-            // --- Lógica de Lectura del ID (Se mantiene solo para mostrar información, no afecta la redirección) ---
-            let hojaID = 'ID-UNICO-ESTATICO'; // Valor que se muestra
-            const urlParams = new URLSearchParams(window.location.search);
-            hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO'; 
             
-            // Muestra el ID en la página (para su diagnóstico o información)
-            document.getElementById('hojaDisplay').textContent = hojaID;
+            // Ocultamos la lógica de ID para esta prueba, ya que no es relevante.
 
-            // 2. Asignar la acción al botón: Siempre redirigir al Bit.ly
+            // Asignar la acción al botón: Redirigir al Bit.ly
             document.getElementById('lanzarGemini').onclick = function() {
-                // Redirige al Bit.ly, que luego lleva a la URL larga de Gemini con el prompt.
+                // Redirige al Bit.ly, que a su vez redirige a la URL larga de Gemini.
                 window.location.href = finalBitlyUrl;
             };
         });
     </script>
 
     <style>
-        /* Estilos CSS Responsivos (El mismo que le di para móviles) */
-        body {
-            background-color: #f0f2f5;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 20px; 
-            background-color: #ffffff; 
-            color: #333; 
-            max-width: 400px; 
-            width: 90%; 
-            margin: 0 auto;
-            border-radius: 10px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-        }
-        h1 { 
-            color: #1a73e8; 
-            font-size: 1.6em; 
-            margin-bottom: 15px; 
-        }
-        p { 
-            margin-bottom: 25px; 
-            line-height: 1.5; 
-            font-size: 1em;
-        }
-        #lanzarGemini {
-            background-color: #4285f4; 
-            color: white;
-            padding: 18px 25px; 
-            border: none;
-            border-radius: 8px; 
-            font-size: 1.1em;
-            width: 100%; 
-            cursor: pointer;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-        #lanzarGemini:hover { 
-            background-color: #3b78e7; 
-        }
-        .instruccion { 
-            margin-top: 25px; 
-            font-size: 0.8em; 
-            color: #666; 
-            padding: 5px;
-            border-top: 1px solid #eee;
-        }
-
-        @media (min-width: 600px) {
-            body {
-                background-color: #f0f2f5; 
-            }
-        }
+        /* [CSS omitido para brevedad, asumiendo que tiene la última versión] */
+        body { background-color: #f0f2f5; padding: 0; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #ffffff; color: #333; max-width: 400px; width: 90%; margin: 0 auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #cc6600; font-size: 1.6em; margin-bottom: 15px; }
+        p { margin-bottom: 25px; line-height: 1.5; font-size: 1em; }
+        #lanzarGemini { background-color: #f4b400; /* Amarillo Google */ color: #333; padding: 18px 25px; border: none; border-radius: 8px; font-size: 1.1em; width: 100%; cursor: pointer; transition: background-color 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        #lanzarGemini:hover { background-color: #e0ac00; }
+        .instruccion { margin-top: 25px; font-size: 0.8em; color: #666; padding: 5px; border-top: 1px solid #eee; }
     </style>
 </body>
 </html>
