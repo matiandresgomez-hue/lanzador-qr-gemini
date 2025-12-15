@@ -1,12 +1,105 @@
-// --- 4. Botón ABRIR GEMINI ---
-            document.getElementById('openGeminiButton').onclick = function() {
-                // Intentamos abrir el esquema de la aplicación nativa
-                const appSchemeUrl = 'googleassistant://settings/main'; 
-                // Si la app no está instalada, el navegador ignora esto o intenta la fallback
-                
-                // Opción 1: Redirección directa al esquema
-                window.location.href = appSchemeUrl;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar Modo Live | Gemini</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="live-header">
+            <span class="material-icons live-icon">graphic_eq</span>
+            <h1>Experiencia Live</h1>
+        </div>
+        
+        <p>Para hablar con esta hoja, inyecta el contexto primero:</p>
+        
+        <div class="step-box">
+            <label>1. Copia la clave de activación:</label>
+            <textarea id="promptTextarea" readonly></textarea>
+            
+            <button id="copyButton" class="action-btn copy-btn">
+                <span class="material-icons">content_copy</span> COPIAR CLAVE
+            </button>
+        </div>
 
-                // Opción 2 (Fallback): Si la redirección falla, el usuario debe abrirla manualmente.
-                // En móviles modernos, el navegador intenta el esquema automáticamente.
+        <div class="step-box">
+            <label>2. Abre Gemini, PEGA y luego activa <span class="material-icons small-icon">mic</span> o <span class="material-icons small-icon">graphic_eq</span>:</label>
+            <button id="openGeminiButton" class="action-btn gemini-btn">
+                <span class="material-icons">rocket_launch</span> ABRIR APP GEMINI
+            </button>
+        </div>
+        
+        <p class="instruccion">
+            ID Hoja: <span id="hojaDisplay">...</span>
+        </p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Obtener ID de la hoja ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
+            document.getElementById('hojaDisplay').textContent = hojaID;
+
+            // --- 2. Prompt diseñado para preparar el modo Live ---
+            const promptTemplate = "Hola Gemini. Voy a activar el modo Live (voz) ahora mismo. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, activa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
+            
+            const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
+            document.getElementById('promptTextarea').value = promptFinal;
+
+            // --- 3. Botón COPIAR ---
+            document.getElementById('copyButton').onclick = function() {
+                const textarea = document.getElementById('promptTextarea');
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                
+                try {
+                    // Intenta usar la API moderna del portapapeles
+                    navigator.clipboard.writeText(textarea.value).then(() => btnExito(this));
+                } catch (err) {
+                    // Fallback para navegadores antiguos
+                    document.execCommand('copy');
+                    btnExito(this);
+                }
             };
+
+            function btnExito(btn) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="material-icons">check</span> ¡LISTO! VE AL PASO 2';
+                btn.style.backgroundColor = '#2e7d32'; // Verde oscuro
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.style.backgroundColor = '#34a853'; // Verde original
+                }, 3000);
+            }
+
+            // --- 4. Botón ABRIR GEMINI (Intento de App Nativa) ---
+            document.getElementById('openGeminiButton').onclick = function() {
+                // Esquema de URL que intenta abrir la aplicación nativa de Google Assistant/Gemini
+                const appSchemeUrl = 'googleassistant://settings/main'; 
+                
+                // Redirección directa para intentar abrir la aplicación
+                window.location.href = appSchemeUrl;
+            };
+        });
+    </script>
+
+    <style>
+        /* Estilos CSS Responsivos para la experiencia "Live" (Dark Mode) */
+        body { background-color: #101010; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: white; }
+        .container { background-color: #1e1e1e; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
+        
+        .live-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .live-icon { color: #ff8a80; font-size: 2rem; animation: pulse 1.5s infinite; }
+        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8rem; margin: 0; }
+        
+        p { color: #bbb; margin-bottom: 25px; font-size: 0.95rem; }
+        
+        .step-box { margin-bottom: 25px; text-align: left; background: #2a2a2a; padding: 15px; border-radius: 12px; }
+        label { display: block; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        
+        #promptTextarea { position: absolute; left: -9999px; } 
+
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, background-color 0.3s; display: flex; justify-content: center;
