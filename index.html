@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activar Modo Live | Gemini</title>
+    <title>Asistente Gemini | Máx. Compatibilidad</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
             <span class="material-icons live-icon">graphic_eq</span>
-            <h1>Experiencia Live</h1>
+            <h1>Experiencia Asistente</h1>
         </div>
         
         <p>Para hablar con esta hoja, inyecta el contexto primero:</p>
@@ -25,9 +25,9 @@
         </div>
 
         <div class="step-box">
-            <label>2. Abre Gemini, PEGA y luego activa <span class="material-icons small-icon">mic</span> o <span class="material-icons small-icon">graphic_eq</span>:</label>
+            <label>2. Abre Gemini, PEGA y luego activa <span class="material-icons small-icon">mic</span> o <span class="material-icons small-icon">photo_camera</span>:</label>
             <button id="openGeminiButton" class="action-btn gemini-btn">
-                <span class="material-icons">rocket_launch</span> ABRIR APP GEMINI
+                <span class="material-icons">rocket_launch</span> ABRIR GEMINI
             </button>
         </div>
         
@@ -43,8 +43,8 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // --- 2. Prompt diseñado para preparar el modo Live ---
-            const promptTemplate = "Hola Gemini. Voy a activar el modo Live (voz) ahora mismo. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, activa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
+            // --- 2. Prompt diseñado para preparar la conversación ---
+            const promptTemplate = "Hola Gemini. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, usa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
             
             const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
             document.getElementById('promptTextarea').value = promptFinal;
@@ -56,10 +56,8 @@
                 textarea.setSelectionRange(0, 99999);
                 
                 try {
-                    // Intenta usar la API moderna del portapapeles
                     navigator.clipboard.writeText(textarea.value).then(() => btnExito(this));
                 } catch (err) {
-                    // Fallback para navegadores antiguos
                     document.execCommand('copy');
                     btnExito(this);
                 }
@@ -75,13 +73,12 @@
                 }, 3000);
             }
 
-            // --- 4. Botón ABRIR GEMINI (Intento de App Nativa) ---
+            // --- 4. Botón ABRIR GEMINI (Máxima Compatibilidad Web) ---
             document.getElementById('openGeminiButton').onclick = function() {
-                // Esquema de URL que intenta abrir la aplicación nativa de Google Assistant/Gemini
-                const appSchemeUrl = 'googleassistant://settings/main'; 
+                // Enlace web de Gemini. Esto siempre abre la web y permite al móvil ofrecer la App.
+                const geminiWebUrl = 'https://gemini.google.com/app'; 
                 
-                // Redirección directa para intentar abrir la aplicación
-                window.location.href = appSchemeUrl;
+                window.location.href = geminiWebUrl;
             };
         });
     </script>
