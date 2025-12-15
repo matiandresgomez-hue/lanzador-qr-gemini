@@ -3,50 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente de Hoja Interactiva | Gemini</title>
+    <title>Asistente Gemini | Máx. Estabilidad</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>✨ Tu Contenido Cobra Vida ✨</h1>
+        <div class="live-header">
+            <span class="material-icons live-icon">graphic_eq</span>
+            <h1>Experiencia Asistente</h1>
+        </div>
         
-        <p>Para analizar la hoja, sigue los 2 pasos. **La carga automática está bloqueada.**</p>
+        <p>Para hablar con esta hoja, sigue estos 2 pasos:</p>
         
         <div class="step-box">
-            <label class="step-label">PASO 1: Copiar Clave de Experto</label>
+            <label>1. Copia la clave de activación:</label>
             <textarea id="promptTextarea" readonly></textarea>
             
             <button id="copyButton" class="action-btn copy-btn">
-                <span class="material-icons">content_copy</span> COPIAR INSTRUCCIÓN
+                <span class="material-icons">content_copy</span> COPIAR CLAVE
             </button>
         </div>
 
         <div class="step-box">
-            <label class="step-label">PASO 2: Abrir y Pegar</label>
+            <label>2. Abre Gemini, PEGA y luego usa <span class="material-icons small-icon">photo_camera</span>:</label>
+            
             <a id="openGeminiLink" href="https://gemini.google.com/app" target="_blank" class="action-btn gemini-btn">
                 <span class="material-icons">rocket_launch</span> ABRIR GEMINI
             </a>
         </div>
         
         <p class="instruccion">
-            ID de la Hoja: <span id="hojaDisplay">Cargando...</span>
+            ID Hoja: <span id="hojaDisplay">...</span>
         </p>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- Lógica de Lectura del ID ---
+            // --- 1. Obtener ID de la hoja ---
             const urlParams = new URLSearchParams(window.location.search);
-            const hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO'; 
+            const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // --- Generar el Prompt COMPLETO para copiar ---
+            // --- 2. Prompt diseñado para preparar la conversación ---
             const promptTemplate = "Hola Gemini. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, usa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
             const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
             document.getElementById('promptTextarea').value = promptFinal;
-            
-            // --- Lógica del Botón COPIAR ---
+
+            // --- 3. Botón COPIAR ---
             document.getElementById('copyButton').onclick = function() {
                 const textarea = document.getElementById('promptTextarea');
                 textarea.select();
@@ -62,112 +65,55 @@
 
             function btnExito(btn) {
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<span class="material-icons">check</span> ¡COPIADO! Ir al Paso 2';
-                btn.style.backgroundColor = '#2e7d32'; 
+                btn.innerHTML = '<span class="material-icons">check</span> ¡LISTO! VE AL PASO 2';
+                btn.style.backgroundColor = '#2e7d32'; // Verde oscuro
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;
-                    btn.style.backgroundColor = '#34a853'; 
+                    btn.style.backgroundColor = '#34a853'; // Verde original
                 }, 3000);
             }
-            
-            // El botón de abrir es un enlace HTML puro, no necesita más JS.
         });
     </script>
-    
+
     <style>
-        /* Estilos CSS Responsivos (Ajustados al diseño original) */
-        body {
-            background-color: #f0f2f5;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: Arial, sans-serif; 
-        }
-        .container { 
-            text-align: center; 
-            padding: 20px; 
-            background-color: #ffffff; 
-            color: #333; 
-            max-width: 400px; 
-            width: 90%; 
-            margin: 0 auto;
-            border-radius: 10px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-        }
-        h1 { 
-            color: #1a73e8; 
-            font-size: 1.6em; 
-            margin-bottom: 15px; 
-        }
-        p { 
-            margin-bottom: 25px; 
-            line-height: 1.5; 
-            font-size: 1em;
-        }
+        /* Estilos CSS Responsivos (Dark Mode) */
+        body { background-color: #101010; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: white; }
+        .container { background-color: #1e1e1e; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
         
-        .step-box {
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        .live-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .live-icon { color: #ff8a80; font-size: 2rem; animation: pulse 1.5s infinite; }
+        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8rem; margin: 0; }
         
-        .step-label {
-            display: block;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 8px;
-            font-size: 0.9em;
-        }
+        p { color: #bbb; margin-bottom: 25px; font-size: 0.95rem; }
+        
+        .step-box { margin-bottom: 25px; text-align: left; background: #2a2a2a; padding: 15px; border-radius: 12px; }
+        label { display: block; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        
+        #promptTextarea { position: absolute; left: -9999px; } 
 
-        #promptTextarea { 
-            position: absolute; 
-            left: -9999px; /* Oculta la caja de texto */
+        .action-btn { 
+            width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, background-color 0.3s; 
+            display: flex; justify-content: center; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; 
+            text-decoration: none; 
+            box-sizing: border-box;
         }
+        .action-btn:active { transform: scale(0.96); }
         
-        .action-btn {
-            padding: 18px 25px; 
-            border: none;
-            border-radius: 8px; 
-            font-size: 1.1em;
-            width: 100%; 
-            cursor: pointer;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            text-decoration: none; /* Para el enlace <a> */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            color: white;
-            font-weight: bold;
-        }
+        .copy-btn { background-color: #34a853; color: white; box-shadow: 0 4px 10px rgba(52, 168, 83, 0.3); }
+        .copy-btn:hover { background-color: #2d9147; }
         
-        /* Estilo para el botón COPIAR (Verde) */
-        .copy-btn {
-            background-color: #34a853; 
-            color: white;
-        }
-        .copy-btn:hover {
-            background-color: #2e8b4e;
-        }
+        .gemini-btn { background-color: #ffffff; color: #1e1e1e; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
+        .gemini-btn:hover { background-color: #dddddd; }
+        
+        .small-icon { font-size: 1.2rem; vertical-align: middle; }
+        
+        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+        #hojaDisplay { color: #888; }
 
-        /* Estilo para el botón ABRIR GEMINI (Azul, como el original) */
-        .gemini-btn {
-            background-color: #4285f4; 
-            color: white;
-        }
-        .gemini-btn:hover {
-            background-color: #3b78e7; 
-        }
-
-        .instruccion { 
-            margin-top: 25px; 
-            font-size: 0.8em; 
-            color: #666; 
-            padding: 5px;
-            border-top: 1px solid #eee;
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </body>
