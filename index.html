@@ -102,4 +102,25 @@
         
         #promptTextarea { position: absolute; left: -9999px; } 
 
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, background-color 0.3s; display: flex; justify-content: center;
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, background-color 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .action-btn:active { transform: scale(0.96); }
+        
+        .copy-btn { background-color: #34a853; color: white; box-shadow: 0 4px 10px rgba(52, 168, 83, 0.3); }
+        .copy-btn:hover { background-color: #2d9147; }
+        
+        .gemini-btn { background-color: #ffffff; color: #1e1e1e; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
+        .gemini-btn:hover { background-color: #dddddd; }
+        
+        .small-icon { font-size: 1.2rem; vertical-align: middle; }
+        
+        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+        #hojaDisplay { color: #888; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</body>
+</html>
