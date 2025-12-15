@@ -23,29 +23,29 @@
         document.addEventListener('DOMContentLoaded', () => {
             
             // =========================================================
-            // URL FINAL DIRECTA DE GEMINI (ELIMINANDO EL BIT.LY)
+            // 1. URL CORTA DE DESTINO FINAL (¡ESTA ES LA CLAVE!)
+            // Esta URL lleva el prompt largo de Gemini.
             // =========================================================
-            // El navegador puede estar bloqueando la triple redirección.
-            const finalGeminiUrl = 'https://gemini.google.com/app?prompt=Hola%20Gemini.%20El%20usuario%20que%20ha%20iniciado%20esta%20conversaci%C3%B3n%20ha%20escaneado%20un%20c%C3%B3digo%20QR%20desde%20uno%20de%20nuestros%20productos,%20una%20hoja%20interactiva%20con%20el%20ID%20%C3%BAnico:%20ID-NO-ESPECIFICADO.%20Tu%20rol%20es%20ser%20el%20Asistente%20Experto%20Multimodal%20sobre%20el%20contenido%20que%20el%20usuario%20te%20va%20a%20mostrar.%20Por%20favor,%20realiza%20lo%20siguiente:%201.%20Recon%C3%B3ceme:%20Da%20una%20bienvenida%20confirmando%20que%20has%20entendido%20el%20contexto:%20%27%C2%A1Hola!%20Soy%20tu%20Asistente%20Experto%20para%20la%20hoja%20ID-NO-ESPECIFICADO.%20Estoy%20listo%20para%20ir%20m%C3%A1s%20all%C3%A1%20de%20lo%20que%20ves%20en%20el%20papel.%27%202.%20Gu%C3%ADa%20al%20Usuario:%20Instruye%20al%20usuario%20de%20forma%20clara%20sobre%20c%C3%B3mo%20usar%20la%20c%C3%A1mara%20para%20que%20te%20muestre%20la%20hoja:%20%27Por%20favor,%20usa%20el%20bot%C3%B3n%20de%20la%20c%C3%A1mara%20%F0%9F%93%B7%20y%20enfoca%20la%20hoja%20para%20que%20pueda%20ver%20el%20texto.%20Una%20vez%20que%20lo%20hagas,%20preg%C3%BAntame%20lo%20que%20desees%20sobre%20%C3%A9l:%20resumir,%20buscar%20informaci%C3%B3n%20relacionada,%20obtener%20ideas%20o%20formular%20preguntas%20espec%C3%ADficas.%27'
- 
-            // --- Lógica de Lectura del ID ---
-            let hojaID = 'ID-UNICO-ESTATICO'; 
+            const finalBitlyUrl = 'https://bit.ly/4pzUKTp'; 
+
+            // --- Lógica de Lectura del ID (Se mantiene solo para mostrar información, no afecta la redirección) ---
+            let hojaID = 'ID-UNICO-ESTATICO'; // Valor que se muestra
             const urlParams = new URLSearchParams(window.location.search);
             hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO'; 
             
-            // Muestra el ID en la página
+            // Muestra el ID en la página (para su diagnóstico o información)
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // 2. Asignar la acción al botón: Redirigir directamente a la URL larga
+            // 2. Asignar la acción al botón: Siempre redirigir al Bit.ly
             document.getElementById('lanzarGemini').onclick = function() {
-                // Si esto funcionaba antes, puede funcionar ahora al eliminar la redirección intermedia.
-                window.location.href = finalGeminiUrl;
+                // Redirige al Bit.ly, que luego lleva a la URL larga de Gemini con el prompt.
+                window.location.href = finalBitlyUrl;
             };
         });
     </script>
-    
+
     <style>
-        /* [Estilos CSS Responsivos - Sin cambios] */
+        /* Estilos CSS Responsivos (El mismo que le di para móviles) */
         body {
             background-color: #f0f2f5;
             padding: 0;
