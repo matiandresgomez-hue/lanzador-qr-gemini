@@ -4,48 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistente de Hoja Interactiva | Gemini</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <h1>✨ Tu Contenido Cobra Vida ✨</h1>
-        <p>Hemos identificado tu hoja. Haz clic abajo para iniciar una conversación con nuestro Asistente Experto Gemini. ¡Recuerda usar la cámara para mostrar el papel!</p>
         
-        <button id="lanzarGemini">
-            🤖 Iniciar Conversación con Gemini
-        </button>
+        <p>Para analizar la hoja, sigue los 2 pasos. **La carga automática está bloqueada.**</p>
+        
+        <div class="step-box">
+            <label class="step-label">PASO 1: Copiar Clave de Experto</label>
+            <textarea id="promptTextarea" readonly></textarea>
+            
+            <button id="copyButton" class="action-btn copy-btn">
+                <span class="material-icons">content_copy</span> COPIAR INSTRUCCIÓN
+            </button>
+        </div>
+
+        <div class="step-box">
+            <label class="step-label">PASO 2: Abrir y Pegar</label>
+            <a id="openGeminiLink" href="https://gemini.google.com/app" target="_blank" class="action-btn gemini-btn">
+                <span class="material-icons">rocket_launch</span> ABRIR GEMINI
+            </a>
+        </div>
         
         <p class="instruccion">
-            ID de la Hoja (para el Asistente): <span id="hojaDisplay">Cargando...</span>
+            ID de la Hoja: <span id="hojaDisplay">Cargando...</span>
         </p>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // =========================================================
-            // 1. URL CORTA DE DESTINO FINAL (¡ESTA ES LA CLAVE!)
-            // Esta URL lleva el prompt largo de Gemini.
-            // =========================================================
-            const finalBitlyUrl = 'https://bit.ly/4pzUKTp'; 
-
-            // --- Lógica de Lectura del ID (Se mantiene solo para mostrar información, no afecta la redirección) ---
-            let hojaID = 'ID-UNICO-ESTATICO'; // Valor que se muestra
+            // --- Lógica de Lectura del ID ---
             const urlParams = new URLSearchParams(window.location.search);
-            hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO'; 
-            
-            // Muestra el ID en la página (para su diagnóstico o información)
+            const hojaID = urlParams.get('hoja') || 'ID-NO-ESPECIFICADO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // 2. Asignar la acción al botón: Siempre redirigir al Bit.ly
-            document.getElementById('lanzarGemini').onclick = function() {
-                // Redirige al Bit.ly, que luego lleva a la URL larga de Gemini con el prompt.
-                window.location.href = finalBitlyUrl;
+            // --- Generar el Prompt COMPLETO para copiar ---
+            const promptTemplate = "Hola Gemini. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, usa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
+            const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
+            document.getElementById('promptTextarea').value = promptFinal;
+            
+            // --- Lógica del Botón COPIAR ---
+            document.getElementById('copyButton').onclick = function() {
+                const textarea = document.getElementById('promptTextarea');
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                
+                try {
+                    navigator.clipboard.writeText(textarea.value).then(() => btnExito(this));
+                } catch (err) {
+                    document.execCommand('copy');
+                    btnExito(this);
+                }
             };
+
+            function btnExito(btn) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="material-icons">check</span> ¡COPIADO! Ir al Paso 2';
+                btn.style.backgroundColor = '#2e7d32'; 
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.style.backgroundColor = '#34a853'; 
+                }, 3000);
+            }
+            
+            // El botón de abrir es un enlace HTML puro, no necesita más JS.
         });
     </script>
-
+    
     <style>
-        /* Estilos CSS Responsivos (El mismo que le di para móviles) */
+        /* Estilos CSS Responsivos (Ajustados al diseño original) */
         body {
             background-color: #f0f2f5;
             padding: 0;
@@ -54,9 +84,9 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: Arial, sans-serif; 
         }
         .container { 
-            font-family: Arial, sans-serif; 
             text-align: center; 
             padding: 20px; 
             background-color: #ffffff; 
@@ -77,9 +107,26 @@
             line-height: 1.5; 
             font-size: 1em;
         }
-        #lanzarGemini {
-            background-color: #4285f4; 
-            color: white;
+        
+        .step-box {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .step-label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        #promptTextarea { 
+            position: absolute; 
+            left: -9999px; /* Oculta la caja de texto */
+        }
+        
+        .action-btn {
             padding: 18px 25px; 
             border: none;
             border-radius: 8px; 
@@ -88,22 +135,39 @@
             cursor: pointer;
             transition: background-color 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            text-decoration: none; /* Para el enlace <a> */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: bold;
         }
-        #lanzarGemini:hover { 
+        
+        /* Estilo para el botón COPIAR (Verde) */
+        .copy-btn {
+            background-color: #34a853; 
+            color: white;
+        }
+        .copy-btn:hover {
+            background-color: #2e8b4e;
+        }
+
+        /* Estilo para el botón ABRIR GEMINI (Azul, como el original) */
+        .gemini-btn {
+            background-color: #4285f4; 
+            color: white;
+        }
+        .gemini-btn:hover {
             background-color: #3b78e7; 
         }
+
         .instruccion { 
             margin-top: 25px; 
             font-size: 0.8em; 
             color: #666; 
             padding: 5px;
             border-top: 1px solid #eee;
-        }
-
-        @media (min-width: 600px) {
-            body {
-                background-color: #f0f2f5; 
-            }
         }
     </style>
 </body>
