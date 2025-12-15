@@ -3,107 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente de Hoja | Gemini</title>
+    <title>Activar Modo Live | Gemini</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>✨ Tu Asistente IA está listo ✨</h1>
-        <p>Para analizar esta hoja, sigue estos 2 pasos simples:</p>
+        <div class="live-header">
+            <span class="material-icons live-icon">graphic_eq</span>
+            <h1>Experiencia Live</h1>
+        </div>
+        
+        <p>Para hablar con esta hoja, inyecta el contexto primero:</p>
         
         <div class="step-box">
-            <label>1. Copia la instrucción mágica:</label>
+            <label>1. Copia la clave de activación:</label>
             <textarea id="promptTextarea" readonly></textarea>
             
             <button id="copyButton" class="action-btn copy-btn">
-                📋 Toca aquí para COPIAR
+                <span class="material-icons">content_copy</span> COPIAR CLAVE
             </button>
         </div>
 
         <div class="step-box">
-            <label>2. Abre la IA y PEGA el texto:</label>
+            <label>2. Abre Gemini, PEGA y luego toca <span class="material-icons small-icon">mic</span> o <span class="material-icons small-icon">graphic_eq</span>:</label>
             <button id="openGeminiButton" class="action-btn gemini-btn">
-                🤖 Ir a Gemini
+                <span class="material-icons">rocket_launch</span> ABRIR APP GEMINI
             </button>
         </div>
         
         <p class="instruccion">
-            Hoja detectada: <span id="hojaDisplay">...</span>
+            ID Hoja: <span id="hojaDisplay">...</span>
         </p>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- 1. Obtener ID de la hoja ---
+            // --- 1. ID ---
             const urlParams = new URLSearchParams(window.location.search);
-            // Si el QR no tiene ID, usa uno genérico
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // --- 2. Crear el Prompt Perfecto ---
-            // Este es el texto que el usuario copiará
-            const promptTemplate = "Hola Gemini. Tengo en mis manos la hoja física con ID: [ID_HOJA]. Actúa como un Asistente Experto sobre este contenido. Por favor, pídeme que te muestre una foto de la hoja usando tu cámara. Una vez que la veas, explícame los conceptos clave, dame ejemplos prácticos o responde mis dudas.";
+            // --- 2. Prompt diseñado para preparar el modo Live ---
+            // Le decimos a la IA que sea breve porque vamos a hablar.
+            const promptTemplate = "Hola Gemini. Voy a activar el modo Live (voz) ahora mismo. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, activa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
             
-            // Insertamos el ID real en el texto
             const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
-            
-            // Ponemos el texto en la caja invisible
             document.getElementById('promptTextarea').value = promptFinal;
 
-            // --- 3. Botón COPIAR ---
+            // --- 3. Copiar ---
             document.getElementById('copyButton').onclick = function() {
                 const textarea = document.getElementById('promptTextarea');
                 textarea.select();
-                textarea.setSelectionRange(0, 99999); // Para móviles
+                textarea.setSelectionRange(0, 99999);
                 
                 try {
-                    navigator.clipboard.writeText(textarea.value).then(() => {
-                        botonCopiado(this);
-                    });
+                    navigator.clipboard.writeText(textarea.value).then(() => btnExito(this));
                 } catch (err) {
                     document.execCommand('copy');
-                    botonCopiado(this);
+                    btnExito(this);
                 }
             };
 
-            function botonCopiado(btn) {
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ ¡Copiado! Ahora ve al paso 2';
-                btn.style.backgroundColor = '#2e7d32'; // Verde oscuro
+            function btnExito(btn) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="material-icons">check</span> ¡LISTO! VE AL PASO 2';
+                btn.style.backgroundColor = '#2e7d32';
                 setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.backgroundColor = '#34a853'; // Verde original
+                    btn.innerHTML = originalHtml;
+                    btn.style.backgroundColor = '#34a853';
                 }, 3000);
             }
 
-            // --- 4. Botón ABRIR GEMINI ---
+            // --- 4. Abrir (Intentamos forzar la App) ---
             document.getElementById('openGeminiButton').onclick = function() {
+                // Usamos el esquema de Google App que suele abrir la app nativa en Android/iOS
                 window.location.href = 'https://gemini.google.com/app';
             };
         });
     </script>
 
     <style>
-        body { background-color: #f0f4f8; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .container { background-color: white; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #1a73e8; font-size: 1.5rem; margin: 0 0 10px 0; }
-        p { color: #5f6368; margin-bottom: 25px; font-size: 0.95rem; }
+        body { background-color: #101010; /* Fondo oscuro estilo Live */ font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: white; }
+        .container { background-color: #1e1e1e; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
         
-        .step-box { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 0.9rem; }
+        .live-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .live-icon { color: #ff8a80; font-size: 2rem; animation: pulse 1.5s infinite; }
+        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8rem; margin: 0; }
         
-        #promptTextarea { position: absolute; left: -9999px; } /* Oculto pero funcional */
+        p { color: #bbb; margin-bottom: 25px; font-size: 0.95rem; }
+        
+        .step-box { margin-bottom: 25px; text-align: left; background: #2a2a2a; padding: 15px; border-radius: 12px; }
+        label { display: block; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        
+        #promptTextarea { position: absolute; left: -9999px; }
 
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, background-color 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .action-btn:active { transform: scale(0.98); }
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s; display: flex; justify-content: center; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .action-btn:active { transform: scale(0.96); }
         
-        .copy-btn { background-color: #34a853; color: white; box-shadow: 0 4px 10px rgba(52, 168, 83, 0.3); }
-        .copy-btn:hover { background-color: #2d9147; }
+        .copy-btn { background-color: #34a853; color: white; }
+        .gemini-btn { background-color: #ffffff; color: #1e1e1e; }
         
-        .gemini-btn { background-color: #4285f4; color: white; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
-        .gemini-btn:hover { background-color: #3367d6; }
+        .small-icon { font-size: 1.2rem; vertical-align: middle; }
+        
+        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+        #hojaDisplay { color: #888; }
 
-        .instruccion { margin-top: 25px; font-size: 0.75rem; color: #9aa0a6; border-top: 1px solid #f1f3f4; padding-top: 10px; }
-        #hojaDisplay { font-weight: bold; color: #5f6368; }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </body>
 </html>
