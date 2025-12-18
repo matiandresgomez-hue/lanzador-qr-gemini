@@ -3,34 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Experto | Modo IA</title>
+    <title>Asistente Experto | Auto-Launch</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">psychology</span>
-            <h1>Modo Respuesta IA</h1>
+            <span class="material-icons live-icon">auto_awesome</span>
+            <h1>Asistente IA Directo</h1>
         </div>
         
-        <p>Iniciando búsqueda inteligente para tu hoja...</p>
+        <p>Al tocar el botón, se abrirá la IA con la instrucción ya cargada. Solo tendrás que usar la cámara.</p>
         
-        <div class="step-box">
-            <label>1. Copia la instrucción de experto:</label>
-            <textarea id="promptTextarea" readonly></textarea>
-            <button id="copyButton" class="action-btn copy-btn">
-                <span class="material-icons">content_copy</span> COPIAR INSTRUCCIÓN
-            </button>
+        <button id="lanzarIA" class="action-btn magic-btn">
+            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
+        </button>
+
+        <div class="instruction-card">
+            <span class="material-icons">photo_camera</span>
+            <p>Dentro de la App, toca la cámara para ver la hoja.</p>
         </div>
 
-        <div class="step-box">
-            <label>2. Lanza la búsqueda en la App:</label>
-            <a id="openGeminiLink" href="#" target="_blank" class="action-btn gemini-btn">
-                <span class="material-icons">search</span> INICIAR BÚSQUEDA IA
-            </a>
-            <p class="small-instruction">Si no aparece la IA arriba, pegá lo que copiaste en el buscador.</p>
-        </div>
-        
         <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
     </div>
     
@@ -40,50 +33,44 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt que funcionó en la búsqueda
-            const promptTemplate = "Analiza la hoja interactiva [ID_HOJA] como profesor experto. ¿Qué actividades hay disponibles? ID: [ID_HOJA].";
-            const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
-            document.getElementById('promptTextarea').value = promptFinal;
+            // Mantenemos el prompt corto para que el sistema no lo bloquee por seguridad
+            const promptFinal = `Profesor experto para hoja ${hojaID}. Analiza el contenido:`;
 
-            // Botón COPIAR
-            document.getElementById('copyButton').onclick = function() {
-                const textarea = document.getElementById('promptTextarea');
-                textarea.select();
-                document.execCommand('copy');
-                btnExito(this);
-            };
+            document.getElementById('lanzarIA').onclick = function() {
+                // ESTA ES LA MAGIA: El "Intent" de Android
+                // Intenta abrir la App de Google directamente con la búsqueda pre-cargada
+                const intentUrl = `intent://www.google.com/search?q=${encodeURIComponent(promptFinal)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.query=${encodeURIComponent(promptFinal)};end`;
+                
+                // Fallback para iPhone o si el intent falla
+                const webUrl = `https://www.google.com/search?q=${encodeURIComponent(promptFinal)}`;
 
-            // URL DE BÚSQUEDA (La clave del éxito)
-            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal);
-            document.getElementById('openGeminiLink').href = searchUrl;
+                // Intentamos disparar el Intent
+                window.location.href = intentUrl;
 
-            function btnExito(btn) {
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<span class="material-icons">check</span> ¡COPIADO!';
-                btn.style.backgroundColor = '#2e7d32'; 
+                // Si en 500ms no pasó nada, abrimos la web normal
                 setTimeout(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.style.backgroundColor = '#34a853'; 
-                }, 3000);
-            }
+                    window.location.href = webUrl;
+                }, 500);
+            };
         });
     </script>
 
     <style>
-        body { background-color: #101010; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: white; }
-        .container { background-color: #1e1e1e; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
-        .live-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .live-icon { color: #4285f4; font-size: 2.5rem; }
-        h1 { background: linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.6rem; margin: 0; }
-        p { color: #bbb; margin-bottom: 25px; font-size: 0.95rem; }
-        .step-box { margin-bottom: 25px; text-align: left; background: #2a2a2a; padding: 15px; border-radius: 12px; }
-        label { display: block; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 0.9rem; }
-        #promptTextarea { position: absolute; left: -9999px; } 
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; }
-        .copy-btn { background-color: #34a853; color: white; }
-        .gemini-btn { background-color: #ffffff; color: #1e1e1e; }
-        .small-instruction { margin-top: 10px; color: #888; font-size: 0.75rem; text-align: center; }
-        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #666; }
+        body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
+        .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
+        h1 { font-size: 1.5rem; margin-bottom: 10px; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
+        
+        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; }
+        
+        .magic-btn { background: #4285f4; color: white; box-shadow: 0 0 20px rgba(66, 133, 244, 0.4); }
+        .magic-btn:active { transform: scale(0.95); }
+
+        .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; }
+        .instruction-card .material-icons { color: #34a853; }
+        .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; text-align: left; }
+        
+        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; }
     </style>
 </body>
 </html>
