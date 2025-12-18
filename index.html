@@ -3,74 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Experto | Auto-Launch</title>
+    <title>Test Iron Maiden | IA</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">auto_awesome</span>
-            <h1>Asistente IA Directo</h1>
+            <span class="material-icons live-icon">vibration</span>
+            <h1>Prueba de Conexión</h1>
         </div>
         
-        <p>Al tocar el botón, se abrirá la IA con la instrucción ya cargada. Solo tendrás que usar la cámara.</p>
+        <p>Vamos a probar si el celular recibe la orden enviando una búsqueda de <b>Iron Maiden</b>.</p>
         
-        <button id="lanzarIA" class="action-btn magic-btn">
-            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
+        <button id="lanzarTest" class="action-btn magic-btn">
+            <span class="material-icons">music_note</span> PROBAR CON IRON MAIDEN
         </button>
 
-        <div class="instruction-card">
-            <span class="material-icons">photo_camera</span>
-            <p>Dentro de la App, toca la cámara para ver la hoja.</p>
-        </div>
-
-        <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
+        <p class="instruccion">Si esto funciona, el sistema está listo para tu prompt real.</p>
     </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
-            document.getElementById('hojaDisplay').textContent = hojaID;
-
-            // Mantenemos el prompt corto para que el sistema no lo bloquee por seguridad
-            const promptFinal = `Profesor experto para hoja ${hojaID}. Analiza el contenido:`;
-
-            document.getElementById('lanzarIA').onclick = function() {
-                // ESTA ES LA MAGIA: El "Intent" de Android
-                // Intenta abrir la App de Google directamente con la búsqueda pre-cargada
-                const intentUrl = `intent://www.google.com/search?q=${encodeURIComponent(promptFinal)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.query=${encodeURIComponent(promptFinal)};end`;
-                
-                // Fallback para iPhone o si el intent falla
-                const webUrl = `https://www.google.com/search?q=${encodeURIComponent(promptFinal)}`;
-
-                // Intentamos disparar el Intent
-                window.location.href = intentUrl;
-
-                // Si en 500ms no pasó nada, abrimos la web normal
-                setTimeout(() => {
-                    window.location.href = webUrl;
-                }, 500);
-            };
-        });
+        document.getElementById('lanzarTest').onclick = function() {
+            const testQuery = "Iron Maiden Argentina";
+            const encoded = encodeURIComponent(testQuery);
+            
+            // Intent directo a la App de Google
+            const intentUrl = `intent://www.google.com/search?q=${encoded}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.query=${encoded};end`;
+            
+            window.location.href = intentUrl;
+        };
     </script>
 
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
         .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        h1 { font-size: 1.5rem; margin-bottom: 10px; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
-        
-        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; }
-        
-        .magic-btn { background: #4285f4; color: white; box-shadow: 0 0 20px rgba(66, 133, 244, 0.4); }
-        .magic-btn:active { transform: scale(0.95); }
-
-        .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; }
-        .instruction-card .material-icons { color: #34a853; }
-        .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; text-align: left; }
-        
-        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; }
+        h1 { font-size: 1.5rem; margin-bottom: 15px; color: #ea4335; }
+        p { color: #888; font-size: 0.95rem; margin-bottom: 30px; }
+        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; }
+        .magic-btn { background: #ea4335; color: white; box-shadow: 0 0 20px rgba(234, 67, 53, 0.4); }
+        .instruccion { margin-top: 25px; font-size: 0.7rem; color: #444; }
     </style>
 </body>
 </html>
