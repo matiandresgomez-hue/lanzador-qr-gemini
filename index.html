@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Experto | Auto-Launch</title>
+    <title>Asistente IA | Directo</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">auto_awesome</span>
-            <h1>Asistente IA Directo</h1>
+            <span class="material-icons live-icon">bolt</span>
+            <h1>Asistente Instantáneo</h1>
         </div>
         
-        <p>Al tocar el botón, se abrirá la App con la instrucción cargada. Solo tendrás que usar la cámara.</p>
+        <p>Al tocar el botón, se abrirá la App de Google con la instrucción lista.</p>
         
-        <button id="lanzarIA" class="action-btn magic-btn">
+        <a id="lanzarIA" href="#" class="action-btn magic-btn">
             <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
-        </button>
+        </a>
 
         <div class="instruction-card">
             <span class="material-icons">photo_camera</span>
-            <p>Dentro de la App, toca la cámara para ver la hoja.</p>
+            <p>Si no ves la cámara al abrirse, toca una vez sobre el texto en la barra de búsqueda.</p>
         </div>
 
         <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
@@ -33,19 +33,27 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt estratégico
-            const promptFinal = `Profesor experto hoja ${hojaID}. Analiza el contenido:`;
+            // Prompt muy corto (mientras más corto, menos chances de que Google oculte la cámara)
+            const promptFinal = `Profesor experto hoja ${hojaID}:`;
+            const encoded = encodeURIComponent(promptFinal);
 
-            document.getElementById('lanzarIA').onclick = function() {
-                const encoded = encodeURIComponent(promptFinal);
-                
-                // --- LA NUEVA ESTRUCTURA DEL INTENT ---
-                // 1. Usamos el esquema 'googleapp' que es más directo.
-                // 2. Pasamos el parámetro 'query' que es el que llena la barra.
-                // 3. El fallback por si no tiene la app.
-                const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;package=com.google.android.googlequicksearchbox;action=android.intent.action.SEARCH;S.browser_fallback_url=https://www.google.com/search?q=${encoded};end`;
+            // 1. Intentamos el esquema más limpio posible (Sin el parámetro 'package' que dispara la Play Store)
+            const nativeUrl = `googleapp://search?query=${encoded}`;
+            
+            // 2. Intent de respaldo por si el primero no reacciona
+            const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;end`;
 
-                window.location.href = intentUrl;
+            const btn = document.getElementById('lanzarIA');
+            
+            btn.onclick = function(e) {
+                e.preventDefault();
+                // Intentamos el salto directo
+                window.location.href = nativeUrl;
+
+                // Si en medio segundo no pasó nada, probamos el segundo método
+                setTimeout(() => {
+                    window.location.href = intentUrl;
+                }, 500);
             };
         });
     </script>
@@ -53,14 +61,22 @@
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
         .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        h1 { font-size: 1.5rem; margin-bottom: 10px; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
-        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; }
-        .magic-btn { background: #4285f4; color: white; box-shadow: 0 0 20px rgba(66, 133, 244, 0.4); }
+        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #888; font-size: 0.9rem; margin: 20px 0; }
+        
+        .action-btn { 
+            width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; 
+            font-weight: bold; cursor: pointer; display: flex; justify-content: center; 
+            align-items: center; gap: 10px; transition: 0.3s; text-decoration: none; box-sizing: border-box;
+        }
+        
+        .magic-btn { background: #fff; color: #000; }
         .magic-btn:active { transform: scale(0.95); }
+
         .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; }
-        .instruction-card .material-icons { color: #34a853; }
+        .instruction-card .material-icons { color: #4285f4; }
         .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; text-align: left; }
+        
         .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; }
     </style>
 </body>
