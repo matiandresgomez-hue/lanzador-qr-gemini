@@ -3,69 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Gemini | Máx. Estabilidad</title>
+    <title>Asistente Experto | Modo IA</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">graphic_eq</span>
-            <h1>Experiencia Asistente</h1>
+            <span class="material-icons live-icon">psychology</span>
+            <h1>Modo Respuesta IA</h1>
         </div>
         
-        <p>Para hablar con esta hoja, sigue estos 2 pasos:</p>
+        <p>Haremos que Google responda con su IA como en tus notificaciones:</p>
         
         <div class="step-box">
-            <label>1. Copia la clave de activación:</label>
+            <label>1. Copia la instrucción de experto:</label>
             <textarea id="promptTextarea" readonly></textarea>
-            
             <button id="copyButton" class="action-btn copy-btn">
-                <span class="material-icons">content_copy</span> COPIAR CLAVE
+                <span class="material-icons">content_copy</span> COPIAR INSTRUCCIÓN
             </button>
         </div>
 
         <div class="step-box">
-            <label>2. Abre Gemini, PEGA y luego usa <span class="material-icons small-icon">photo_camera</span>:</label>
-            
-            <a id="openGeminiLink" href="https://gemini.google.com/chat" target="_blank" class="action-btn gemini-btn">
-                <span class="material-icons">rocket_launch</span> ABRIR GEMINI
+            <label>2. Lanza la búsqueda en la App de Google:</label>
+            <a id="openGeminiLink" href="#" target="_blank" class="action-btn gemini-btn">
+                <span class="material-icons">search</span> INICIAR BÚSQUEDA IA
             </a>
+            <p class="small-instruction">Si no sale la IA de inmediato, PEGA lo copiado en la barra de búsqueda.</p>
         </div>
         
-        <p class="instruccion">
-            ID Hoja: <span id="hojaDisplay">...</span>
-        </p>
+        <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- 1. Obtener ID de la hoja ---
             const urlParams = new URLSearchParams(window.location.search);
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // --- 2. Prompt diseñado para preparar la conversación ---
-            const promptTemplate = "Hola Gemini. Tengo la hoja física [ID_HOJA]. Por favor, NO me des una respuesta larga escrita ahora. Solo dime: 'Estoy listo, usa la cámara o el micrófono y muéstrame la hoja'. Tu rol es ser mi profesor experto sobre este papel. ID: [ID_HOJA].";
+            // Prompt optimizado
+            const promptTemplate = "Analiza la hoja interactiva [ID_HOJA] como profesor experto. ¿Qué actividades hay disponibles? ID: [ID_HOJA].";
             const promptFinal = promptTemplate.replace(/\[ID_HOJA\]/g, hojaID);
             document.getElementById('promptTextarea').value = promptFinal;
 
-            // --- 3. Botón COPIAR ---
+            // Botón COPIAR
             document.getElementById('copyButton').onclick = function() {
                 const textarea = document.getElementById('promptTextarea');
                 textarea.select();
-                textarea.setSelectionRange(0, 99999);
-                
-                try {
-                    navigator.clipboard.writeText(textarea.value).then(() => btnExito(this));
-                } catch (err) {
-                    document.execCommand('copy');
-                    btnExito(this);
-                }
+                document.execCommand('copy');
+                btnExito(this);
             };
+
+            // CONFIGURACIÓN DEL BOTÓN "IRON MAIDEN" (Búsqueda de Google)
+            // Esto imita la notificación de Google
+            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal);
+            document.getElementById('openGeminiLink').href = searchUrl;
 
             function btnExito(btn) {
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<span class="material-icons">check</span> ¡LISTO! VE AL PASO 2';
+                btn.innerHTML = '<span class="material-icons">check</span> ¡COPIADO!';
                 btn.style.backgroundColor = '#2e7d32'; 
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;
@@ -76,45 +71,20 @@
     </script>
 
     <style>
-        /* Estilos CSS Responsivos (Dark Mode) */
         body { background-color: #101010; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: white; }
         .container { background-color: #1e1e1e; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
-        
         .live-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .live-icon { color: #ff8a80; font-size: 2rem; animation: pulse 1.5s infinite; }
-        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8rem; margin: 0; }
-        
+        .live-icon { color: #4285f4; font-size: 2.5rem; }
+        h1 { background: linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.6rem; margin: 0; }
         p { color: #bbb; margin-bottom: 25px; font-size: 0.95rem; }
-        
         .step-box { margin-bottom: 25px; text-align: left; background: #2a2a2a; padding: 15px; border-radius: 12px; }
-        label { display: block; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-        
+        label { display: block; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 0.9rem; }
         #promptTextarea { position: absolute; left: -9999px; } 
-
-        .action-btn { 
-            width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, background-color 0.3s; 
-            display: flex; justify-content: center; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; 
-            text-decoration: none; 
-            box-sizing: border-box;
-        }
-        .action-btn:active { transform: scale(0.96); }
-        
-        .copy-btn { background-color: #34a853; color: white; box-shadow: 0 4px 10px rgba(52, 168, 83, 0.3); }
-        .copy-btn:hover { background-color: #2d9147; }
-        
-        .gemini-btn { background-color: #ffffff; color: #1e1e1e; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
-        .gemini-btn:hover { background-color: #dddddd; }
-        
-        .small-icon { font-size: 1.2rem; vertical-align: middle; }
-        
-        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
-        #hojaDisplay { color: #888; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; }
+        .copy-btn { background-color: #34a853; color: white; }
+        .gemini-btn { background-color: #ffffff; color: #1e1e1e; }
+        .small-instruction { margin-top: 10px; color: #888; font-size: 0.75rem; text-align: center; }
+        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #666; }
     </style>
 </body>
 </html>
