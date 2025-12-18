@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente IA | Directo</title>
+    <title>Asistente IA | Modo App</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">bolt</span>
-            <h1>Asistente Instantáneo</h1>
+            <span class="material-icons live-icon">camera_enhance</span>
+            <h1>Asistente con Cámara</h1>
         </div>
         
-        <p>Al tocar el botón, saltaremos directamente a la App de Google con tu instrucción.</p>
+        <p>Para activar la cámara, debemos abrir la <b>App de Google</b>. Tocá el botón de abajo:</p>
         
-        <a id="botonMagico" href="#" class="action-btn magic-btn">
-            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
+        <a id="lanzarApp" href="#" class="action-btn magic-btn">
+            <span class="material-icons">rocket_launch</span> ABRIR EN APP DE GOOGLE
         </a>
 
         <div class="instruction-card">
-            <span class="material-icons">photo_camera</span>
-            <p>Si ves el texto pero no la cámara, toca una vez la barra de búsqueda en Google.</p>
+            <span class="material-icons">info</span>
+            <p>Si se abre la App y ves el texto, el icono de la <b>Cámara</b> <span class="material-icons small-icon">photo_camera</span> aparecerá a la derecha.</p>
         </div>
 
         <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
@@ -33,48 +33,46 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt corto para asegurar que Lens (la cámara) aparezca
-            const promptFinal = `Profesor experto hoja ${hojaID}. Analiza:`;
+            const promptFinal = `Profesor experto hoja ${hojaID}. Analizá:`;
             const encoded = encodeURIComponent(promptFinal);
 
-            // Esta es la URL que imita la notificación de Google
-            // Al ser un enlace de google.com/search, Android intenta abrirlo con la App nativa
-            const googleUrl = `https://www.google.com/search?q=${encoded}`;
+            // ESTE ES EL COMANDO QUE "SALTA" DE CHROME A LA APP
+            // Al especificar el 'package', Android intenta abrir la App directamente
+            const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;package=com.google.android.googlequicksearchbox;action=android.intent.action.SEARCH;S.query=${encoded};end`;
 
-            const link = document.getElementById('botonMagico');
-            link.href = googleUrl;
+            const link = document.getElementById('lanzarApp');
+            link.href = intentUrl;
 
-            // TRUCO: Forzamos al navegador a que crea que es una navegación externa
+            // Si por alguna razón no salta, intentamos un segundo método al hacer clic
             link.onclick = function() {
-                window.location.assign(googleUrl);
-                return false; 
+                window.location.href = intentUrl;
             };
         });
     </script>
 
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
-        .container { background-color: #111; width: 90%; max-width: 350px; padding: 45px 25px; border-radius: 35px; text-align: center; border: 1px solid #222; box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
-        h1 { font-size: 1.6rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
-        .live-header { margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+        .live-header { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .live-icon { font-size: 3.5rem; color: #4285f4; }
-        p { color: #888; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
+        p { color: #888; font-size: 0.9rem; margin-bottom: 30px; line-height: 1.4; }
         
         .action-btn { 
-            width: 100%; padding: 22px; border: none; border-radius: 20px; font-size: 1.1rem; 
+            width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; 
             font-weight: bold; display: flex; justify-content: center; align-items: center; 
-            gap: 12px; transition: 0.3s; text-decoration: none; box-sizing: border-box;
-            text-transform: uppercase; letter-spacing: 1px;
+            gap: 10px; transition: 0.3s; text-decoration: none; box-sizing: border-box; text-transform: uppercase;
         }
         
-        .magic-btn { background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.15); }
-        .magic-btn:active { transform: scale(0.96); background: #f0f0f0; }
+        .magic-btn { background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.1); }
+        .magic-btn:active { transform: scale(0.95); }
 
-        .instruction-card { margin-top: 35px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 18px; border-radius: 18px; border: 1px solid #333; text-align: left; }
-        .instruction-card .material-icons { color: #4285f4; font-size: 1.8rem; }
-        .instruction-card p { margin: 0; font-size: 0.8rem; color: #bbb; line-height: 1.3; }
+        .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; text-align: left; }
+        .instruction-card .material-icons { color: #4285f4; }
+        .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; }
         
-        .instruccion { margin-top: 30px; font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
+        .small-icon { font-size: 1rem; vertical-align: middle; }
+        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; text-transform: uppercase; }
     </style>
 </body>
 </html>
