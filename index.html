@@ -1,1 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente IA | Conexión Directa</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="live-header">
+            <span class="material-icons live-icon">bolt</span>
+            <h1>Asistente Activo</h1>
+        </div>
+        
+        <p>Seguí estos dos pasos para que la IA vea tu hoja:</p>
+        
+        <div class="step-box">
+            <label>1. Prepará la instrucción:</label>
+            <button id="copyButton" class="action-btn copy-btn">
+                <span class="material-icons">content_copy</span> COPIAR CLAVE
+            </button>
+            <textarea id="promptTextarea" readonly style="position:absolute; left:-9999px;"></textarea>
+        </div>
 
+        <div class="step-box">
+            <label>2. Abrí la App de Google:</label>
+            <a id="lanzarApp" href="#" class="action-btn magic-btn">
+                <span class="material-icons">photo_camera</span> ABRIR CÁMARA IA
+            </a>
+        </div>
+
+        <div class="help-note">
+            <span class="material-icons">tips_and_updates</span>
+            <p>Si la App abre vacía, <b>PEGÁ</b> lo que copiaste y tocá el icono de la cámara.</p>
+        </div>
+
+        <p class="footer-id">ID Hoja: <span id="hojaDisplay">...</span></p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Capturar ID de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const hojaID = urlParams.get('hoja') || 'PROFESOR'; 
+            document.getElementById('hojaDisplay').textContent = hojaID;
+
+            // Prompt estratégico
+            const promptFinal = `Analizá esta hoja [ID: ${hojaID}] como mi profesor experto. ¿Cómo empezamos?`;
+            document.getElementById('promptTextarea').value = promptFinal;
+            const encoded = encodeURIComponent(promptFinal);
+
+            // Intent de alta compatibilidad (Modo Búsqueda Nativa)
+            const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;action=android.intent.action.SEARCH;end`;
+            document.getElementById('lanzarApp').href = intentUrl;
+
+            // Lógica de copiado
+            document.getElementById('copyButton').onclick = function() {
+                const textarea = document.getElementById('promptTextarea');
+                textarea.select();
+                document.execCommand('copy');
+                
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="material-icons">check</span> ¡LISTO!';
+                this.style.backgroundColor = '#2e7d32';
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.backgroundColor = '#34a853';
+                }, 2000);
+            };
+        });
+    </script>
+
+    <style>
+        body { background-color: #0a0a0a; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; }
+        .container { background-color: #161616; width: 100%; max-width: 360px; padding: 40px 25px; border-radius: 30px; text-align: center; border: 1px solid #222; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        
+        .live-header { margin-bottom: 25px; }
+        .live-icon { font-size: 3.5rem; color: #4285f4; margin-bottom: 10px; }
+        h1 { font-size: 1.6rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        p { color: #999; font-size: 0.95rem; margin-bottom: 30px; line-height: 1.4; }
+        .step-box { margin-bottom: 20px; text-align: left; }
+        label { display: block; color: #eee; font-size: 0.85rem; margin-bottom: 8px; font-weight: bold; }
+
+        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; transition: 0.3s; cursor: pointer; text-transform: uppercase; }
+        .copy-btn { background-color: #34a853; color: white; }
+        .magic-btn { background-color: white; color: black; }
+        .magic-btn:active { transform: scale(0.96); }
+
+        .help-note { margin-top: 30px; display: flex; align-items: center; gap: 12px; background: #222; padding: 15px; border-radius: 15px; text-align: left; }
+        .help-note .material-icons { color: #fbbc05; }
+        .help-note p { margin: 0; font-size: 0.8rem; color: #ccc; line-height: 1.3; }
+
+        .footer-id { margin-top: 25px; font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</body>
+</html>
