@@ -13,15 +13,15 @@
             <h1>Asistente Instantáneo</h1>
         </div>
         
-        <p>Al tocar el botón, se abrirá la App de Google con la instrucción lista.</p>
+        <p>Al tocar el botón, saltaremos directamente a la App de Google con tu instrucción.</p>
         
-        <a id="lanzarIA" href="#" class="action-btn magic-btn">
+        <a id="botonMagico" href="#" class="action-btn magic-btn">
             <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
         </a>
 
         <div class="instruction-card">
             <span class="material-icons">photo_camera</span>
-            <p>Si no ves la cámara al abrirse, toca una vez sobre el texto en la barra de búsqueda.</p>
+            <p>Si ves el texto pero no la cámara, toca una vez la barra de búsqueda en Google.</p>
         </div>
 
         <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
@@ -33,51 +33,48 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt muy corto (mientras más corto, menos chances de que Google oculte la cámara)
-            const promptFinal = `Profesor experto hoja ${hojaID}:`;
+            // Prompt corto para asegurar que Lens (la cámara) aparezca
+            const promptFinal = `Profesor experto hoja ${hojaID}. Analiza:`;
             const encoded = encodeURIComponent(promptFinal);
 
-            // 1. Intentamos el esquema más limpio posible (Sin el parámetro 'package' que dispara la Play Store)
-            const nativeUrl = `googleapp://search?query=${encoded}`;
-            
-            // 2. Intent de respaldo por si el primero no reacciona
-            const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;end`;
+            // Esta es la URL que imita la notificación de Google
+            // Al ser un enlace de google.com/search, Android intenta abrirlo con la App nativa
+            const googleUrl = `https://www.google.com/search?q=${encoded}`;
 
-            const btn = document.getElementById('lanzarIA');
-            
-            btn.onclick = function(e) {
-                e.preventDefault();
-                // Intentamos el salto directo
-                window.location.href = nativeUrl;
+            const link = document.getElementById('botonMagico');
+            link.href = googleUrl;
 
-                // Si en medio segundo no pasó nada, probamos el segundo método
-                setTimeout(() => {
-                    window.location.href = intentUrl;
-                }, 500);
+            // TRUCO: Forzamos al navegador a que crea que es una navegación externa
+            link.onclick = function() {
+                window.location.assign(googleUrl);
+                return false; 
             };
         });
     </script>
 
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
-        .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: #888; font-size: 0.9rem; margin: 20px 0; }
+        .container { background-color: #111; width: 90%; max-width: 350px; padding: 45px 25px; border-radius: 35px; text-align: center; border: 1px solid #222; box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
+        h1 { font-size: 1.6rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .live-header { margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .live-icon { font-size: 3.5rem; color: #4285f4; }
+        p { color: #888; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
         
         .action-btn { 
-            width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; 
-            font-weight: bold; cursor: pointer; display: flex; justify-content: center; 
-            align-items: center; gap: 10px; transition: 0.3s; text-decoration: none; box-sizing: border-box;
+            width: 100%; padding: 22px; border: none; border-radius: 20px; font-size: 1.1rem; 
+            font-weight: bold; display: flex; justify-content: center; align-items: center; 
+            gap: 12px; transition: 0.3s; text-decoration: none; box-sizing: border-box;
+            text-transform: uppercase; letter-spacing: 1px;
         }
         
-        .magic-btn { background: #fff; color: #000; }
-        .magic-btn:active { transform: scale(0.95); }
+        .magic-btn { background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.15); }
+        .magic-btn:active { transform: scale(0.96); background: #f0f0f0; }
 
-        .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; }
-        .instruction-card .material-icons { color: #4285f4; }
-        .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; text-align: left; }
+        .instruction-card { margin-top: 35px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 18px; border-radius: 18px; border: 1px solid #333; text-align: left; }
+        .instruction-card .material-icons { color: #4285f4; font-size: 1.8rem; }
+        .instruction-card p { margin: 0; font-size: 0.8rem; color: #bbb; line-height: 1.3; }
         
-        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; }
+        .instruccion { margin-top: 30px; font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </body>
 </html>
