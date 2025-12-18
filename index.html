@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Experto | Auto-Launch</title>
+    <title>Asistente Experto | VIP</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">auto_awesome</span>
-            <h1>Asistente IA Directo</h1>
+            <span class="material-icons live-icon">bolt</span>
+            <h1>Asistente Instantáneo</h1>
         </div>
         
-        <p>Al tocar el botón, se abrirá la IA con la instrucción ya cargada. Solo tendrás que usar la cámara.</p>
+        <p>Experiencia optimizada: la instrucción ya está cargada. ¡Solo falta tu cámara!</p>
         
         <button id="lanzarIA" class="action-btn magic-btn">
-            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
+            <span class="material-icons">rocket_launch</span> INICIAR AHORA
         </button>
 
         <div class="instruction-card">
             <span class="material-icons">photo_camera</span>
-            <p>Dentro de la App, toca la cámara para ver la hoja.</p>
+            <p>Al abrirse, tocá la cámara en la barra para ver la hoja.</p>
         </div>
 
         <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
@@ -33,24 +33,25 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Mantenemos el prompt corto para que el sistema no lo bloquee por seguridad
-            const promptFinal = `Profesor experto para hoja ${hojaID}. Analiza el contenido:`;
+            // Prompt estratégico: corto para que no oculte el icono de Lens
+            const promptFinal = `Profesor experto hoja ${hojaID}. Analizá:`;
 
             document.getElementById('lanzarIA').onclick = function() {
-                // ESTA ES LA MAGIA: El "Intent" de Android
-                // Intenta abrir la App de Google directamente con la búsqueda pre-cargada
-                const intentUrl = `intent://www.google.com/search?q=${encodeURIComponent(promptFinal)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.query=${encodeURIComponent(promptFinal)};end`;
+                const query = encodeURIComponent(promptFinal);
                 
-                // Fallback para iPhone o si el intent falla
-                const webUrl = `https://www.google.com/search?q=${encodeURIComponent(promptFinal)}`;
+                // 1. Intentamos el protocolo directo (No pasa por Play Store)
+                const directAppUrl = `googleapp://search?query=${query}`;
+                
+                // 2. Intent de respaldo (más agresivo si el primero falla)
+                const intentUrl = `intent:search?q=${query}#Intent;scheme=googleapp;package=com.google.android.googlequicksearchbox;end`;
 
-                // Intentamos disparar el Intent
-                window.location.href = intentUrl;
+                // Ejecución
+                window.location.href = directAppUrl;
 
-                // Si en 500ms no pasó nada, abrimos la web normal
+                // Si no abre en 400ms, probamos el segundo método
                 setTimeout(() => {
-                    window.location.href = webUrl;
-                }, 500);
+                    window.location.href = intentUrl;
+                }, 400);
             };
         });
     </script>
@@ -60,16 +61,12 @@
         .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
         h1 { font-size: 1.5rem; margin-bottom: 10px; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         p { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
-        
         .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; }
-        
-        .magic-btn { background: #4285f4; color: white; box-shadow: 0 0 20px rgba(66, 133, 244, 0.4); }
+        .magic-btn { background: white; color: black; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
         .magic-btn:active { transform: scale(0.95); }
-
         .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; }
-        .instruction-card .material-icons { color: #34a853; }
+        .instruction-card .material-icons { color: #4285f4; }
         .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; text-align: left; }
-        
         .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; }
     </style>
 </body>
