@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente IA | Modo App</title>
+    <title>Asistente IA | Salto Directo</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">camera_enhance</span>
-            <h1>Asistente con Cámara</h1>
+            <span class="material-icons live-icon">bolt</span>
+            <h1>Asistente Instantáneo</h1>
         </div>
         
-        <p>Para activar la cámara, debemos abrir la <b>App de Google</b>. Tocá el botón de abajo:</p>
+        <p>Experiencia optimizada: sin pasar por la tienda. La IA recibirá tu instrucción de inmediato.</p>
         
-        <a id="lanzarApp" href="#" class="action-btn magic-btn">
-            <span class="material-icons">rocket_launch</span> ABRIR EN APP DE GOOGLE
+        <a id="lanzarIA" href="#" class="action-btn magic-btn">
+            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
         </a>
 
         <div class="instruction-card">
-            <span class="material-icons">info</span>
-            <p>Si se abre la App y ves el texto, el icono de la <b>Cámara</b> <span class="material-icons small-icon">photo_camera</span> aparecerá a la derecha.</p>
+            <span class="material-icons">photo_camera</span>
+            <p>Al abrirse Google, verás tu texto. Toca la <b>Cámara</b> para analizar la hoja.</p>
         </div>
 
         <p class="instruccion">ID Hoja: <span id="hojaDisplay">...</span></p>
@@ -33,46 +33,46 @@
             const hojaID = urlParams.get('hoja') || 'GENÉRICO'; 
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            const promptFinal = `Profesor experto hoja ${hojaID}. Analizá:`;
+            const promptFinal = `Profesor experto hoja ${hojaID}. Analiza:`;
             const encoded = encodeURIComponent(promptFinal);
 
-            // ESTE ES EL COMANDO QUE "SALTA" DE CHROME A LA APP
-            // Al especificar el 'package', Android intenta abrir la App directamente
-            const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;package=com.google.android.googlequicksearchbox;action=android.intent.action.SEARCH;S.query=${encoded};end`;
+            // --- EL CAMBIO CLAVE ---
+            // Eliminamos "package" y "browser_fallback_url". 
+            // Esto evita que Chrome tenga una "ruta de escape" hacia la Play Store.
+            const intentUrl = `intent:search?q=${encoded}#Intent;scheme=googleapp;action=android.intent.action.SEARCH;end`;
 
-            const link = document.getElementById('lanzarApp');
+            const link = document.getElementById('lanzarIA');
             link.href = intentUrl;
 
-            // Si por alguna razón no salta, intentamos un segundo método al hacer clic
-            link.onclick = function() {
-                window.location.href = intentUrl;
+            link.onclick = function(e) {
+                // Forzamos el salto sin dejar rastro en el historial de Chrome
+                window.location.replace(intentUrl);
+                return false;
             };
         });
     </script>
 
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
-        .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+        .container { background-color: #111; width: 90%; max-width: 350px; padding: 40px 25px; border-radius: 35px; text-align: center; border: 1px solid #222; }
         h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
-        .live-header { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .live-header { margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .live-icon { font-size: 3.5rem; color: #4285f4; }
         p { color: #888; font-size: 0.9rem; margin-bottom: 30px; line-height: 1.4; }
         
         .action-btn { 
-            width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1.1rem; 
+            width: 100%; padding: 22px; border: none; border-radius: 20px; font-size: 1.1rem; 
             font-weight: bold; display: flex; justify-content: center; align-items: center; 
-            gap: 10px; transition: 0.3s; text-decoration: none; box-sizing: border-box; text-transform: uppercase;
+            gap: 12px; transition: 0.3s; text-decoration: none; box-sizing: border-box; text-transform: uppercase;
         }
         
         .magic-btn { background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.1); }
-        .magic-btn:active { transform: scale(0.95); }
+        .magic-btn:active { transform: scale(0.96); }
 
-        .instruction-card { margin-top: 30px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; text-align: left; }
-        .instruction-card .material-icons { color: #4285f4; }
-        .instruction-card p { margin: 0; font-size: 0.8rem; color: #ccc; }
-        
-        .small-icon { font-size: 1rem; vertical-align: middle; }
-        .instruccion { margin-top: 20px; font-size: 0.7rem; color: #444; text-transform: uppercase; }
+        .instruction-card { margin-top: 35px; display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 18px; border-radius: 18px; border: 1px solid #333; text-align: left; }
+        .instruction-card .material-icons { color: #4285f4; font-size: 1.8rem; }
+        .instruction-card p { margin: 0; font-size: 0.8rem; color: #bbb; line-height: 1.3; }
+        .instruccion { margin-top: 25px; font-size: 0.7rem; color: #444; text-transform: uppercase; }
     </style>
 </body>
 </html>
