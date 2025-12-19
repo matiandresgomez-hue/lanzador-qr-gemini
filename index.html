@@ -3,58 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesor IA | Vision Pro</title>
+    <title>Profesor IA | Vision Manuscrita</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        :root { --bg: #000; --card: #111; --primary: #4285f4; --accent: #34a853; --text: #eee; }
-        body { background-color: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: var(--text); padding: 20px; box-sizing: border-box; }
-        .container { background-color: var(--card); width: 100%; max-width: 400px; padding: 35px 25px; border-radius: 30px; text-align: center; border: 1px solid #222; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        :root { --bg: #000; --card: #111; --primary: #4285f4; --text: #eee; }
+        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: var(--text); padding: 20px; box-sizing: border-box; }
+        .container { background-color: var(--card); width: 100%; max-width: 380px; padding: 40px 25px; border-radius: 30px; text-align: center; border: 1px solid #222; }
+        
         h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .icon-header { font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; }
-        p.status { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
-        .btn { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; text-decoration: none; }
-        .btn-capture { background-color: var(--primary); color: white; }
-        .btn-google { background-color: white; color: black; margin-top: 15px; display: none; }
-        #loader { display: none; margin: 20px 0; }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .bar-bg { background: #222; height: 6px; border-radius: 10px; overflow: hidden; width: 100%; }
-        #bar-fill { background: var(--primary); height: 100%; width: 0%; transition: 0.3s; }
-        #result-area { display: none; margin-top: 20px; text-align: left; }
-        textarea { width: 100%; height: 120px; background: #1a1a1a; color: #ccc; border: 1px solid #333; border-radius: 12px; padding: 12px; box-sizing: border-box; font-size: 0.85rem; resize: none; }
-        .label-edit { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 5px; display: block; }
+        .icon-header { font-size: 4rem; color: var(--primary); margin-bottom: 15px; }
+        
+        .step-card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; text-align: left; }
+        .step-card h2 { font-size: 0.9rem; color: var(--primary); margin: 0 0 10px 0; text-transform: uppercase; }
+        .step-card p { font-size: 0.85rem; color: #aaa; margin: 0; line-height: 1.4; }
+
+        .btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; text-decoration: none; }
+        .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 8px 20px rgba(66, 133, 244, 0.3); }
+        .btn-primary:active { transform: scale(0.96); }
+
+        #preview-area { display: none; margin-top: 20px; }
+        #photo-preview { width: 100%; border-radius: 15px; border: 2px solid var(--primary); max-height: 200px; object-fit: cover; margin-bottom: 15px; }
+
         .footer { margin-top: 30px; font-size: 0.65rem; color: #333; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <span class="material-icons icon-header">auto_awesome</span>
-        <h1>Vision Profesor IA</h1>
-        <p id="main-status" class="status">Paso 1: Capturá la hoja de trabajo.</p>
+        <span class="material-icons icon-header">visibility</span>
+        <h1>Vision Manuscrita</h1>
+        <p style="color:#666; font-size: 0.9rem; margin: 10px 0 25px 0;">Preparando la IA para leer tu letra...</p>
 
-        <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
-        
-        <button id="btn-scan" class="btn btn-capture">
-            <span class="material-icons">photo_camera</span> ESCANEAR HOJA
-        </button>
-
-        <div id="loader">
-            <div class="spinner"></div>
-            <p id="load-text" style="font-size: 0.8rem; color: var(--primary);">Mejorando imagen...</p>
-            <div class="bar-bg"><div id="bar-fill"></div></div>
-        </div>
-
-        <div id="result-area">
-            <span class="label-edit">REVISÁ EL TEXTO LEÍDO:</span>
-            <textarea id="ocr-text"></textarea>
-            <button id="btn-go" class="btn btn-google">
-                <span class="material-icons">psychology</span> ANALIZAR EN ESPAÑOL
+        <div id="step1">
+            <div class="step-card">
+                <h2>Paso 1</h2>
+                <p>Sacá una foto de tu hoja manuscrita. Esto copiará la "llave" para que la IA entienda tu letra.</p>
+            </div>
+            <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
+            <button id="btn-capture" class="btn btn-primary">
+                <span class="material-icons">photo_camera</span> CAPTURAR HOJA
             </button>
         </div>
 
-        <canvas id="canvas" style="display:none;"></canvas>
+        <div id="preview-area">
+            <img id="photo-preview" src="" alt="Vista previa">
+            <div class="step-card">
+                <h2>Paso 2: ¡Listo!</h2>
+                <p>La instrucción ya se copió. Ahora tocá el botón, <b>PEGÁ</b> y usá la <b>Cámara</b> de Google para que la IA lea la hoja.</p>
+            </div>
+            <a id="btn-go" href="#" target="_blank" class="btn btn-primary" style="background: white; color: black;">
+                <span class="material-icons">auto_awesome</span> ANALIZAR CON IA
+            </a>
+        </div>
+
         <p class="footer">HOJA ID: <span id="hoja-id">...</span></p>
     </div>
 
@@ -65,76 +66,39 @@
             document.getElementById('hoja-id').textContent = hojaID;
 
             const input = document.getElementById('cameraInput');
-            const btnScan = document.getElementById('btn-scan');
-            const loader = document.getElementById('loader');
-            const barFill = document.getElementById('bar-fill');
-            const resultArea = document.getElementById('result-area');
-            const ocrText = document.getElementById('ocr-text');
+            const btnCapture = document.getElementById('btn-capture');
+            const previewArea = document.getElementById('preview-area');
+            const photoPreview = document.getElementById('photo-preview');
             const btnGo = document.getElementById('btn-go');
-            const mainStatus = document.getElementById('main-status');
 
-            btnScan.onclick = () => input.click();
+            // PROMPT MAESTRO PARA LETRA MANUSCRITA
+            const superPrompt = `Respondé siempre en español. Actuá como profesor experto. Voy a mostrarte una foto de mi hoja manuscrita (ID: ${hojaID}). Por favor, leé mi letra, analizá el contenido y explicame de qué trata y cómo resolverlo.`;
 
-            input.onchange = async (e) => {
+            btnCapture.onclick = () => input.click();
+
+            input.onchange = (e) => {
                 const file = e.target.files[0];
-                if (!file) return;
-
-                btnScan.style.display = 'none';
-                loader.style.display = 'block';
-                mainStatus.innerText = "Leyendo contenido...";
-
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                img.onload = async () => {
-                    const canvas = document.getElementById('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const d = imageData.data;
-                    for (let i = 0; i < d.length; i += 4) {
-                        const avg = (d[i] + d[i+1] + d[i+2]) / 3;
-                        const val = avg > 120 ? 255 : 0;
-                        d[i] = d[i+1] = d[i+2] = val;
-                    }
-                    ctx.putImageData(imageData, 0, 0);
-
-                    try {
-                        const worker = await Tesseract.createWorker('spa');
-                        const { data: { text } } = await worker.recognize(canvas.toDataURL());
-                        await worker.terminate();
-
-                        loader.style.display = 'none';
-                        resultArea.style.display = 'block';
-                        btnGo.style.display = 'flex';
-                        ocrText.value = text.trim();
-                        mainStatus.innerText = "¡Lectura lista!";
-                    } catch (err) {
-                        alert("Error de lectura.");
-                        location.reload();
-                    }
-                };
+                if (file) {
+                    photoPreview.src = URL.createObjectURL(file);
+                    document.getElementById('step1').style.display = 'none';
+                    previewArea.style.display = 'block';
+                    
+                    // Copiado automático del prompt de visión
+                    copyToClipboard(superPrompt);
+                }
             };
 
-            btnGo.onclick = () => {
-                const finalContent = ocrText.value;
-                if (!finalContent) return;
+            const googleUrl = "https://www.google.com/search?q=" + encodeURIComponent(superPrompt);
+            btnGo.href = googleUrl;
 
-                // AGREGAMOS LA ORDEN DE IDIOMA AL PRINCIPIO
-                const superPrompt = `Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}: ${finalContent}`;
-                
+            function copyToClipboard(text) {
                 const el = document.createElement('textarea');
-                el.value = superPrompt;
+                el.value = text;
                 document.body.appendChild(el);
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-
-                const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(superPrompt);
-                window.open(searchUrl, "_blank");
-            };
+            }
         });
     </script>
 </body>
