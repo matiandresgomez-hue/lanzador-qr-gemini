@@ -3,103 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesor IA | Vision Manuscrita</title>
+    <title>Asistente IA | Directo</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        :root { --bg: #000; --card: #111; --primary: #4285f4; --text: #eee; }
-        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: var(--text); padding: 20px; box-sizing: border-box; }
-        .container { background-color: var(--card); width: 100%; max-width: 380px; padding: 40px 25px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        
-        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .icon-header { font-size: 4rem; color: var(--primary); margin-bottom: 15px; }
-        
-        .step-card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; text-align: left; }
-        .step-card h2 { font-size: 0.9rem; color: var(--primary); margin: 0 0 10px 0; text-transform: uppercase; }
-        .step-card p { font-size: 0.85rem; color: #aaa; margin: 0; line-height: 1.4; }
-
-        .btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; text-decoration: none; }
-        .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 8px 20px rgba(66, 133, 244, 0.3); }
-        .btn-primary:active { transform: scale(0.96); }
-
-        #preview-area { display: none; margin-top: 20px; }
-        #photo-preview { width: 100%; border-radius: 15px; border: 2px solid var(--primary); max-height: 200px; object-fit: cover; margin-bottom: 15px; }
-
-        .footer { margin-top: 30px; font-size: 0.65rem; color: #333; letter-spacing: 2px; }
-    </style>
 </head>
 <body>
-
     <div class="container">
-        <span class="material-icons icon-header">visibility</span>
-        <h1>Vision Manuscrita</h1>
-        <p style="color:#666; font-size: 0.9rem; margin: 10px 0 25px 0;">Preparando la IA para leer tu letra...</p>
-
-        <div id="step1">
-            <div class="step-card">
-                <h2>Paso 1</h2>
-                <p>Sacá una foto de tu hoja manuscrita. Esto copiará la "llave" para que la IA entienda tu letra.</p>
-            </div>
-            <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
-            <button id="btn-capture" class="btn btn-primary">
-                <span class="material-icons">photo_camera</span> CAPTURAR HOJA
-            </button>
+        <div class="live-header">
+            <span class="material-icons live-icon">auto_awesome</span>
+            <h1>Asistente IA</h1>
         </div>
+        
+        <p>Al tocar el botón, se copiará la instrucción y se abrirá Google. Solo tenés que <b>pegar</b> el texto y usar la cámara.</p>
+        
+        <a id="botonLanzar" href="#" target="_blank" class="action-btn magic-btn">
+            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
+        </a>
 
-        <div id="preview-area">
-            <img id="photo-preview" src="" alt="Vista previa">
-            <div class="step-card">
-                <h2>Paso 2: ¡Listo!</h2>
-                <p>La instrucción ya se copió. Ahora tocá el botón, <b>PEGÁ</b> y usá la <b>Cámara</b> de Google para que la IA lea la hoja.</p>
-            </div>
-            <a id="btn-go" href="#" target="_blank" class="btn btn-primary" style="background: white; color: black;">
-                <span class="material-icons">auto_awesome</span> ANALIZAR CON IA
-            </a>
-        </div>
-
-        <p class="footer">HOJA ID: <span id="hoja-id">...</span></p>
+        <p class="footer">ID Hoja: <span id="hojaDisplay">...</span></p>
+        
+        <textarea id="copyText" style="position: absolute; left: -9999px;"></textarea>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const hojaID = params.get('hoja') || 'PROFESOR';
-            document.getElementById('hoja-id').textContent = hojaID;
+            // Captura el ID de la hoja de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const hojaID = urlParams.get('hoja') || 'PROFESOR';
+            document.getElementById('hojaDisplay').textContent = hojaID;
 
-            const input = document.getElementById('cameraInput');
-            const btnCapture = document.getElementById('btn-capture');
-            const previewArea = document.getElementById('preview-area');
-            const photoPreview = document.getElementById('photo-preview');
-            const btnGo = document.getElementById('btn-go');
+            // Prompt optimizado (Incluye la orden de responder en español)
+            const promptFinal = `Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
+            document.getElementById('copyText').value = promptFinal;
 
-            // PROMPT MAESTRO PARA LETRA MANUSCRITA
-            const superPrompt = `Respondé siempre en español. Actuá como profesor experto. Voy a mostrarte una foto de mi hoja manuscrita (ID: ${hojaID}). Por favor, leé mi letra, analizá el contenido y explicame de qué trata y cómo resolverlo.`;
+            const btn = document.getElementById('botonLanzar');
+            
+            // Link de búsqueda de Google (Modo Iron Maiden)
+            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal);
+            btn.href = searchUrl;
 
-            btnCapture.onclick = () => input.click();
-
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    photoPreview.src = URL.createObjectURL(file);
-                    document.getElementById('step1').style.display = 'none';
-                    previewArea.style.display = 'block';
-                    
-                    // Copiado automático del prompt de visión
-                    copyToClipboard(superPrompt);
-                }
-            };
-
-            const googleUrl = "https://www.google.com/search?q=" + encodeURIComponent(superPrompt);
-            btnGo.href = googleUrl;
-
-            function copyToClipboard(text) {
-                const el = document.createElement('textarea');
-                el.value = text;
-                document.body.appendChild(el);
-                el.select();
+            // Al hacer clic, copia y luego el navegador sigue el link
+            btn.onclick = function() {
+                const textArea = document.getElementById('copyText');
+                textArea.select();
                 document.execCommand('copy');
-                document.body.removeChild(el);
-            }
+                
+                // Feedback visual rápido
+                this.innerHTML = '<span class="material-icons">check</span> ¡COPIADO Y LANZANDO!';
+                this.style.backgroundColor = '#34a853';
+                this.style.color = '#fff';
+            };
         });
     </script>
+
+    <style>
+        body { background-color: #000; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; }
+        .container { background-color: #111; width: 100%; max-width: 350px; padding: 45px 25px; border-radius: 35px; text-align: center; border: 1px solid #222; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        h1 { font-size: 1.6rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+        .live-icon { font-size: 3.5rem; color: #4285f4; margin-bottom: 15px; }
+        p { color: #888; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
+        
+        .action-btn { width: 100%; padding: 22px; border: none; border-radius: 18px; font-size: 1.1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; }
+        
+        .magic-btn { background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.1); }
+        .magic-btn:active { transform: scale(0.96); }
+
+        .footer { margin-top: 35px; font-size: 0.7rem; color: #333; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
 </body>
 </html>
