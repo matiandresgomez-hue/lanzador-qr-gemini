@@ -13,7 +13,7 @@
             <h1>Asistente IA</h1>
         </div>
         
-        <p>Al tocar el botón, se copiará la instrucción y saltaremos al <b>Modo IA</b>.</p>
+        <p>Al tocar el botón, se copiará la instrucción y saltaremos directo a la pestaña de <b>IA</b>.</p>
         
         <a id="botonLanzar" href="#" target="_blank" class="action-btn magic-btn">
             <span class="material-icons">bolt</span> INICIAR MODO IA
@@ -25,7 +25,6 @@
         </div>
 
         <p class="footer">ID Hoja: <span id="hojaDisplay">...</span></p>
-        
         <textarea id="copyText" style="position: absolute; left: -9999px;"></textarea>
     </div>
 
@@ -35,14 +34,15 @@
             const hojaID = urlParams.get('hoja') || 'PROFESOR';
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt estratégico sin comillas
             const promptFinal = `Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
             document.getElementById('copyText').value = promptFinal;
 
             const btn = document.getElementById('botonLanzar');
             
-            // udm=18 suele ser IA. Si te manda a Foros, probá cambiar el 18 por 14 o 1
-            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=13";
+            // --- EL AJUSTE DE LA SOLAPA ---
+            // Probamos udm=24 (Pestaña Gemini/IA a la izquierda)
+            // Otros valores posibles: 24, 32 o 18
+            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=24";
             btn.href = searchUrl;
 
             btn.onclick = function() {
@@ -65,7 +65,6 @@
         p { color: #888; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
         .action-btn { width: 100%; padding: 22px; border: none; border-radius: 18px; font-size: 1.1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; }
         .magic-btn { background: #fff; color: #000; }
-        .magic-btn:active { transform: scale(0.96); }
         .info-card { margin-top: 30px; background: #1a1a1a; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 10px; border: 1px solid #333; }
         .info-card .material-icons { color: #4285f4; font-size: 1.2rem; }
         .info-card p { margin: 0; font-size: 0.8rem; color: #aaa; text-align: left; }
