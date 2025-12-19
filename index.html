@@ -3,37 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesor IA | Modo Nativo</title>
+    <title>Profesor IA | Chrome Edition</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
             <span class="material-icons live-icon">auto_awesome</span>
-            <h1>Vision Profesor IA</h1>
+            <h1>Asistente IA</h1>
         </div>
         
-        <div class="status-card">
-            <p>Estado: <b>Listo para analizar</b></p>
-            <p class="desc">Al tocar, saltaremos a la pestaña <b>IA/Gemini</b> de la izquierda.</p>
-        </div>
+        <p>Al tocar el botón, se copiará la instrucción y se abrirá el buscador. Solo tenés que <b>pegar</b> el texto y usar la cámara.</p>
         
         <a id="botonLanzar" href="#" target="_blank" class="action-btn magic-btn">
-            <span class="material-icons">bolt</span> INICIAR MODO IA
+            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
         </a>
 
-        <div class="instructions">
-            <div class="step">
-                <span class="material-icons">content_paste</span>
-                <p>1. <b>Pegá</b> el texto (ya se copió solo).</p>
-            </div>
-            <div class="step">
-                <span class="material-icons">photo_camera</span>
-                <p>2. Usá la <b>cámara</b> para la hoja.</p>
-            </div>
+        <div class="info-card">
+            <span class="material-icons">info</span>
+            <p>Se abrirá en una nueva pestaña de Chrome. Mantené presionado el buscador para <b>pegar</b>.</p>
         </div>
 
-        <p class="footer">ID: <span id="hojaDisplay">...</span></p>
+        <p class="footer">ID Hoja: <span id="hojaDisplay">...</span></p>
+        
         <textarea id="copyText" style="position: absolute; left: -9999px;"></textarea>
     </div>
 
@@ -43,53 +35,98 @@
             const hojaID = urlParams.get('hoja') || 'PROFESOR';
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            const promptFinal = `Responde en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
+            // Prompt estratégico (Sin comillas para evitar errores de búsqueda)
+            const promptFinal = `Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
             document.getElementById('copyText').value = promptFinal;
 
             const btn = document.getElementById('botonLanzar');
-            const encodedPrompt = encodeURIComponent(promptFinal);
-
-            // --- EL AJUSTE MAESTRO ---
-            // 1. Probamos con udm=18 que es el estándar de IA.
-            // 2. Agregamos 'pfe=ia' para forzar el motor de inteligencia artificial.
-            const googleSearchUrl = `https://www.google.com/search?q=${encodedPrompt}&udm=18&pfe=ia`;
             
-            // 3. Intentamos un "Intent" que abra la App de Google directamente en esa solapa
-            const intentUrl = `intent://www.google.com/search?q=${encodedPrompt}&udm=18#Intent;scheme=https;package=com.google.android.googlequicksearchbox;S.android.intent.extra.REFERRER_NAME=https://www.google.com;end`;
-
-            // Si es Android, usamos el Intent para que no abra Chrome, sino la App de Google
-            btn.href = /Android/i.test(navigator.userAgent) ? intentUrl : googleSearchUrl;
+            // Link de búsqueda estándar (El que mejor abre Chrome)
+            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal);
+            btn.href = searchUrl;
 
             btn.onclick = function() {
+                // Ejecuta el copiado
                 const textArea = document.getElementById('copyText');
                 textArea.select();
                 document.execCommand('copy');
                 
-                this.innerHTML = '<span class="material-icons">check_circle</span> ENTRANDO A IA...';
-                this.style.background = 'linear-gradient(90deg, #4285f4, #9b72cb)';
+                // Feedback visual de éxito
+                this.innerHTML = '<span class="material-icons">check</span> ¡COPIADO Y ABRIENDO!';
+                this.style.backgroundColor = '#34a853';
+                this.style.color = '#fff';
             };
         });
     </script>
 
     <style>
-        :root { --blue: #4285f4; --purple: #9b72cb; --green: #34a853; --dark: #0a0a0a; }
-        body { background-color: var(--dark); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; }
-        .container { background-color: #111; width: 100%; max-width: 360px; padding: 40px 25px; border-radius: 40px; text-align: center; border: 1px solid #222; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-        .live-icon { font-size: 3.5rem; background: linear-gradient(45deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 2s infinite; }
-        h1 { font-size: 1.5rem; margin: 0; }
-        .status-card { background: #1a1a1a; padding: 15px; border-radius: 20px; margin-bottom: 30px; border: 1px solid #222; }
-        .status-card p { margin: 0; font-size: 0.9rem; color: #888; }
-        .status-card b { color: var(--green); }
-        .desc { font-size: 0.75rem !important; margin-top: 5px !important; }
-        .action-btn { width: 100%; padding: 22px; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 12px; text-decoration: none; transition: 0.3s; text-transform: uppercase; box-sizing: border-box; }
-        .magic-btn { background: white; color: black; box-shadow: 0 10px 30px rgba(255,255,255,0.1); }
-        .magic-btn:active { transform: scale(0.94); }
-        .instructions { margin-top: 30px; text-align: left; background: #0a0a0a; padding: 20px; border-radius: 20px; }
-        .step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .step .material-icons { color: var(--blue); font-size: 1.2rem; }
-        .step p { margin: 0; font-size: 0.85rem; color: #ccc; }
-        .footer { margin-top: 35px; font-size: 0.65rem; color: #333; text-transform: uppercase; letter-spacing: 3px; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        body { 
+            background-color: #000; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            color: white; 
+            padding: 20px; 
+        }
+        .container { 
+            background-color: #111; 
+            width: 100%; 
+            max-width: 350px; 
+            padding: 45px 25px; 
+            border-radius: 35px; 
+            text-align: center; 
+            border: 1px solid #222; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5); 
+        }
+        h1 { 
+            font-size: 1.6rem; 
+            margin: 0; 
+            background: linear-gradient(45deg, #4285f4, #34a853); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-weight: bold; 
+        }
+        .live-icon { font-size: 3.5rem; color: #4285f4; margin-bottom: 15px; }
+        p { color: #888; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
+        
+        .action-btn { 
+            width: 100%; 
+            padding: 22px; 
+            border: none; 
+            border-radius: 18px; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px; 
+            text-decoration: none; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            text-transform: uppercase; 
+            box-sizing: border-box; 
+        }
+        
+        .magic-btn { background: #fff; color: #000; }
+        .magic-btn:active { transform: scale(0.96); }
+
+        .info-card { 
+            margin-top: 30px; 
+            background: #1a1a1a; 
+            padding: 15px; 
+            border-radius: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border: 1px solid #333;
+        }
+        .info-card .material-icons { color: #4285f4; font-size: 1.2rem; }
+        .info-card p { margin: 0; font-size: 0.8rem; color: #aaa; text-align: left; }
+
+        .footer { margin-top: 35px; font-size: 0.7rem; color: #333; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </body>
 </html>
