@@ -10,30 +10,20 @@
         :root { --bg: #000; --card: #111; --primary: #4285f4; --accent: #34a853; --text: #eee; }
         body { background-color: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: var(--text); padding: 20px; box-sizing: border-box; }
         .container { background-color: var(--card); width: 100%; max-width: 400px; padding: 35px 25px; border-radius: 30px; text-align: center; border: 1px solid #222; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        
-        /* Header */
         h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .icon-header { font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; }
         p.status { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
-
-        /* Botones */
         .btn { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; text-decoration: none; }
         .btn-capture { background-color: var(--primary); color: white; }
         .btn-google { background-color: white; color: black; margin-top: 15px; display: none; }
-        .btn:active { transform: scale(0.96); }
-
-        /* Loader */
         #loader { display: none; margin: 20px 0; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .bar-bg { background: #222; height: 6px; border-radius: 10px; overflow: hidden; width: 100%; }
         #bar-fill { background: var(--primary); height: 100%; width: 0%; transition: 0.3s; }
-
-        /* Resultado */
         #result-area { display: none; margin-top: 20px; text-align: left; }
         textarea { width: 100%; height: 120px; background: #1a1a1a; color: #ccc; border: 1px solid #333; border-radius: 12px; padding: 12px; box-sizing: border-box; font-size: 0.85rem; resize: none; }
         .label-edit { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 5px; display: block; }
-
         .footer { margin-top: 30px; font-size: 0.65rem; color: #333; letter-spacing: 2px; }
     </style>
 </head>
@@ -60,7 +50,7 @@
             <span class="label-edit">REVISÁ EL TEXTO LEÍDO:</span>
             <textarea id="ocr-text"></textarea>
             <button id="btn-go" class="btn btn-google">
-                <span class="material-icons">psychology</span> ANALIZAR CON IA
+                <span class="material-icons">psychology</span> ANALIZAR EN ESPAÑOL
             </button>
         </div>
 
@@ -102,7 +92,6 @@
                     canvas.height = img.height;
                     ctx.drawImage(img, 0, 0);
 
-                    // FILTRO PRO: B/N para que el OCR no falle
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const d = imageData.data;
                     for (let i = 0; i < d.length; i += 4) {
@@ -113,15 +102,7 @@
                     ctx.putImageData(imageData, 0, 0);
 
                     try {
-                        const worker = await Tesseract.createWorker('spa', 1, {
-                            logger: m => {
-                                if (m.status === 'recognizing text') {
-                                    const p = Math.floor(m.progress * 100);
-                                    barFill.style.width = p + "%";
-                                    document.getElementById('load-text').innerText = `Leyendo... ${p}%`;
-                                }
-                            }
-                        });
+                        const worker = await Tesseract.createWorker('spa');
                         const { data: { text } } = await worker.recognize(canvas.toDataURL());
                         await worker.terminate();
 
@@ -130,9 +111,8 @@
                         btnGo.style.display = 'flex';
                         ocrText.value = text.trim();
                         mainStatus.innerText = "¡Lectura lista!";
-                        
                     } catch (err) {
-                        alert("Error de lectura. Intentá con más luz.");
+                        alert("Error de lectura.");
                         location.reload();
                     }
                 };
@@ -142,13 +122,9 @@
                 const finalContent = ocrText.value;
                 if (!finalContent) return;
 
-                // EL SECRETO DEL ÉXITO:
-                // 1. Empezamos con "IA Gemini" o "Google AI" para gatillar el panel.
-                // 2. NO usamos comillas alrededor del texto del OCR.
-                // 3. Agregamos la orden de "profesor experto".
-                const superPrompt = `IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}: ${finalContent}`;
+                // AGREGAMOS LA ORDEN DE IDIOMA AL PRINCIPIO
+                const superPrompt = `Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}: ${finalContent}`;
                 
-                // Copiado de respaldo
                 const el = document.createElement('textarea');
                 el.value = superPrompt;
                 document.body.appendChild(el);
@@ -156,7 +132,6 @@
                 document.execCommand('copy');
                 document.body.removeChild(el);
 
-                // Lanzar búsqueda (activará el panel de IA arriba)
                 const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(superPrompt);
                 window.open(searchUrl, "_blank");
             };
