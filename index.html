@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente IA | Modo Experto</title>
+    <title>Asistente IA | OCR Pro</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
@@ -11,11 +11,11 @@
 
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">auto_awesome</span>
-            <h1>Profesor IA Vision</h1>
+            <span class="material-icons live-icon">document_scanner</span>
+            <h1>Profesor Vision IA</h1>
         </div>
 
-        <p id="statusText">Paso 1: Sacá una foto de la hoja.</p>
+        <p id="statusText">Paso 1: Sacá una foto nítida y bien iluminada.</p>
 
         <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
         
@@ -25,25 +25,26 @@
 
         <div id="processingUI" style="display: none;">
             <div class="spinner"></div>
-            <p id="progressLabel">Procesando imagen... 0%</p>
+            <p id="progressLabel">Limpiando imagen... 0%</p>
             <div class="progress-bar"><div id="progressFill"></div></div>
             <canvas id="hiddenCanvas" style="display:none;"></canvas>
         </div>
 
         <div id="editBox" style="display: none;">
             <div class="success-badge">
-                <span class="material-icons">check_circle</span>
-                <span>Texto extraído con éxito</span>
+                <span class="material-icons">verified</span>
+                <span>Texto detectado</span>
             </div>
             
-            <textarea id="ocrResultText"></textarea>
+            <textarea id="ocrResultText" placeholder="Revisá el texto aquí..."></textarea>
             
             <button id="goSearch" class="action-btn search-btn">
-                <span class="material-icons">search</span> ENVIAR A PROFESOR IA
+                <span class="material-icons">bolt</span> ENVIAR A PROFESOR IA
             </button>
+            <p class="hint">Si algo se leyó mal, podés corregirlo arriba antes de enviar.</p>
         </div>
 
-        <p class="footer-id">Hoja: <span id="hojaDisplay">...</span></p>
+        <p class="footer-id">ID: <span id="hojaDisplay">...</span></p>
     </div>
 
     <script>
@@ -74,17 +75,23 @@
                 img.src = URL.createObjectURL(file);
                 
                 img.onload = async () => {
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
                     
-                    // FILTRO: Limpieza para OCR
+                    // Redimensionar para optimizar lectura
+                    const scale = Math.min(1500 / img.width, 1500 / img.height, 1);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // --- FILTRO DE BINARIZACIÓN (Mejora el OCR) ---
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
                     for (let i = 0; i < data.length; i += 4) {
-                        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-                        const val = avg > 128 ? 255 : 0;
+                        // Convertir a escala de grises con peso real
+                        const avg = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                        // Umbral dinámico: si es más oscuro que 120, se vuelve negro (0), si no, blanco (255)
+                        const val = avg > 120 ? 255 : 0; 
                         data[i] = data[i+1] = data[i+2] = val;
                     }
                     ctx.putImageData(imageData, 0, 0);
@@ -99,14 +106,16 @@
                                 }
                             }
                         });
-                        const { data: { text } } = await worker.recognize(canvas.toDataURL());
+                        
+                        // Usamos la imagen filtrada del canvas
+                        const { data: { text } } = await worker.recognize(canvas.toDataURL('image/jpeg', 0.8));
                         await worker.terminate();
 
                         processingUI.style.display = 'none';
                         editBox.style.display = 'block';
                         ocrTextarea.value = text.trim();
                     } catch (err) {
-                        alert("Error de lectura.");
+                        alert("Error de lectura. Probá con más luz.");
                         location.reload();
                     }
                 };
@@ -116,11 +125,10 @@
                 const text = ocrTextarea.value;
                 if (!text) return;
 
-                // CAMBIO CLAVE: Quitamos comillas y agregamos "Gemini" o "IA" al inicio
-                // Esto hace que Google active el panel de IA en vez de buscar resultados
+                // Prompt optimizado para Google Search
                 const superPrompt = `Gemini analizá y explicá este ejercicio de la hoja ${hojaID}: ${text}`;
                 
-                // Copiamos al portapapeles por seguridad
+                // Copiado de seguridad
                 const el = document.createElement('textarea');
                 el.value = superPrompt;
                 document.body.appendChild(el);
@@ -128,29 +136,4 @@
                 document.execCommand('copy');
                 document.body.removeChild(el);
 
-                // Abrimos Google Search normal (La que te funcionaba)
-                const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(superPrompt);
-                window.open(searchUrl, "_blank");
-            };
-        });
-    </script>
-
-    <style>
-        body { background-color: #000; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; }
-        .container { background-color: #111; width: 100%; max-width: 400px; padding: 35px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        h1 { font-size: 1.5rem; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-        .live-icon { font-size: 3rem; color: #4285f4; margin-bottom: 10px; }
-        p { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
-        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; text-transform: uppercase; }
-        .capture-btn { background: #4285f4; color: white; }
-        .search-btn { background: white; color: black; }
-        .progress-bar { background: #222; height: 8px; border-radius: 10px; width: 100%; overflow: hidden; margin-top: 10px; }
-        #progressFill { background: #4285f4; height: 100%; width: 0%; transition: width 0.3s; }
-        textarea { width: 100%; height: 150px; background: #1a1a1a; color: #eee; border: 1px solid #333; border-radius: 15px; padding: 15px; font-size: 0.9rem; margin-bottom: 20px; box-sizing: border-box; }
-        .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-left-color: #4285f4; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .footer-id { margin-top: 30px; font-size: 0.7rem; color: #333; }
-        .success-badge { color: #34a853; font-weight: bold; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-    </style>
-</body>
-</html>
+                // Abrimos Google Search (Modo Respuesta IA
