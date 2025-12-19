@@ -3,32 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Scanner Pro</title>
+    <title>Asistente IA | OCR Nativo</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">camera</span>
-            <h1>IA Escáner Experto</h1>
+            <span class="material-icons live-icon">psychology</span>
+            <h1>IA Vision Pro</h1>
         </div>
 
-        <p id="instruccion">Paso 1: Capturá la hoja para activar al profesor experto.</p>
+        <p id="statusText">Paso 1: Sacá una foto nítida de la hoja para que la IA la lea.</p>
 
         <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
         
         <button id="mainButton" class="action-btn capture-btn">
-            <span class="material-icons">photo_camera</span> CAPTURAR HOJA
+            <span class="material-icons">photo_camera</span> CAPTURAR Y LEER
         </button>
 
-        <div id="previewContainer" style="display: none;">
-            <img id="photoPreview" src="" alt="Captura">
-            <div class="status-badge"><span class="material-icons">check_circle</span> HOJA CAPTURADA</div>
+        <div id="progressContainer" style="display: none;">
+            <div class="progress-bar"><div id="progressFill"></div></div>
+            <p id="progressLabel">Leyendo texto... 0%</p>
         </div>
 
-        <a id="goGoogle" href="#" target="_blank" class="action-btn google-btn" style="display: none;">
-            <span class="material-icons">psychology</span> ANALIZAR CON IA
-        </a>
+        <div id="resultBox" style="display: none;">
+            <div class="success-card">
+                <span class="material-icons">check_circle</span>
+                <p>Hoja procesada con éxito</p>
+            </div>
+            <button id="goGoogle" class="action-btn google-btn">
+                <span class="material-icons">rocket_launch</span> ABRIR ASISTENTE IA
+            </button>
+        </div>
 
         <p class="footer-id">ID: <span id="hojaDisplay">...</span></p>
     </div>
@@ -39,41 +46,64 @@
             const hojaID = urlParams.get('hoja') || 'PROFESOR';
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            const promptFinal = `Analizá esta hoja [ID: ${hojaID}] como mi profesor experto. ¿Qué actividades hay?`;
-            
             const cameraInput = document.getElementById('cameraInput');
             const mainButton = document.getElementById('mainButton');
-            const previewContainer = document.getElementById('previewContainer');
-            const photoPreview = document.getElementById('photoPreview');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressLabel = document.getElementById('progressLabel');
+            const resultBox = document.getElementById('resultBox');
+            const statusText = document.getElementById('statusText');
             const goGoogle = document.getElementById('goGoogle');
-            const instruccion = document.getElementById('instruccion');
 
-            // 1. Al tocar el botón verde, abre la cámara
+            let textoExtraido = "";
+
             mainButton.onclick = () => cameraInput.click();
 
-            // 2. Cuando el usuario toma la foto...
-            cameraInput.onchange = (e) => {
+            cameraInput.onchange = async (e) => {
                 const file = e.target.files[0];
-                if (file) {
-                    // Mostrar la foto en la página
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        photoPreview.src = event.target.result;
-                        previewContainer.style.display = 'block';
-                        
-                        // Cambiar la interfaz
-                        mainButton.style.display = 'none';
-                        goGoogle.style.display = 'flex';
-                        instruccion.innerHTML = "<b>¡Excelente!</b> Ahora tocá el botón blanco y pegá la instrucción.";
-                        
-                        // COPIAR EL PROMPT AUTOMÁTICAMENTE
-                        copyToClipboard(promptFinal);
-                    };
-                    reader.readAsDataURL(file);
+                if (!file) return;
+
+                // Preparar interfaz para procesar
+                mainButton.style.display = 'none';
+                progressContainer.style.display = 'block';
+                statusText.innerText = "Procesando imagen con OCR...";
+
+                try {
+                    // INICIAR OCR
+                    const worker = await Tesseract.createWorker('spa', 1, {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                let p = Math.floor(m.progress * 100);
+                                progressFill.style.width = p + "%";
+                                progressLabel.innerText = `Leyendo texto... ${p}%`;
+                            }
+                        }
+                    });
+
+                    const { data: { text } } = await worker.recognize(file);
+                    textoExtraido = text;
+                    await worker.terminate();
+
+                    // Finalizar
+                    progressContainer.style.display = 'none';
+                    resultBox.style.display = 'block';
+                    statusText.innerText = "¡Listo! La IA ya sabe qué dice tu hoja.";
+
+                    // ARMAR Y COPIAR PROMPT AUTOMÁTICAMENTE
+                    const superPrompt = `Soy tu alumno. Analizá este texto que acabo de escanear de mi hoja [ID: ${hojaID}]: "${textoExtraido.substring(0, 1000)}". Actuá como profesor experto y explicame el tema.`;
+                    copyToClipboard(superPrompt);
+
+                } catch (err) {
+                    alert("Error al leer la imagen. Intentá de nuevo con más luz.");
+                    location.reload();
                 }
             };
 
-            // Función de copiado silencioso
+            goGoogle.onclick = () => {
+                const promptFinal = `Soy tu alumno con la hoja ${hojaID}. Analizá el texto escaneado: ${textoExtraido.substring(0, 500)}`;
+                window.open("https://www.google.com/search?q=" + encodeURIComponent(promptFinal), "_blank");
+            };
+
             function copyToClipboard(text) {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -82,38 +112,29 @@
                 document.execCommand('copy');
                 document.body.removeChild(el);
             }
-
-            // URL que abre la App de Google (Modo Iron Maiden)
-            goGoogle.href = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal);
         });
     </script>
 
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; }
         .container { background-color: #111; width: 100%; max-width: 360px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        
-        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
         .live-icon { font-size: 3rem; color: #4285f4; margin-bottom: 10px; }
-        
         p { color: #888; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.4; }
         
-        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; transition: 0.3s; text-transform: uppercase; }
-        
-        .capture-btn { background-color: #34a853; color: white; box-shadow: 0 5px 15px rgba(52, 168, 83, 0.3); }
-        .google-btn { background-color: white; color: black; animation: pulse 2s infinite; }
+        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; transition: 0.3s; text-transform: uppercase; cursor: pointer; }
+        .capture-btn { background-color: #4285f4; color: white; }
+        .google-btn { background-color: white; color: black; }
 
-        #previewContainer { margin-bottom: 20px; position: relative; }
-        #photoPreview { width: 100%; border-radius: 15px; border: 2px solid #34a853; max-height: 250px; object-fit: cover; }
-        
-        .status-badge { background: #34a853; color: white; font-size: 0.7rem; padding: 5px 12px; border-radius: 50px; display: inline-flex; align-items: center; gap: 5px; position: absolute; bottom: 10px; right: 10px; }
+        /* Barra de progreso */
+        .progress-bar { background: #222; border-radius: 50px; height: 10px; width: 100%; margin-bottom: 10px; overflow: hidden; }
+        #progressFill { background: #4285f4; height: 100%; width: 0%; transition: width 0.2s; }
+        #progressLabel { font-size: 0.75rem; color: #4285f4; font-weight: bold; }
 
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255,255,255,0); }
-            100% { transform: scale(1); }
-        }
+        .success-card { background: #1a1a1a; border: 1px solid #34a853; padding: 15px; border-radius: 15px; margin-bottom: 20px; color: #34a853; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .success-card p { margin: 0; color: #34a853; font-weight: bold; }
 
-        .footer-id { margin-top: 25px; font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
+        .footer-id { margin-top: 30px; font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </body>
 </html>
