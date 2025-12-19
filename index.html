@@ -3,45 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente IA | OCR Optimizado</title>
+    <title>Asistente IA | Profesor Experto</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
+
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">document_scanner</span>
-            <h1>Escáner Inteligente</h1>
+            <span class="material-icons live-icon">psychology</span>
+            <h1>Vision Profesor IA</h1>
         </div>
 
-        <p id="statusText">Paso 1: Sacá una foto de cerca y con buena luz.</p>
+        <p id="statusText">Paso 1: Capturá la hoja de actividades.</p>
 
         <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
         
         <button id="mainButton" class="action-btn capture-btn">
-            <span class="material-icons">photo_camera</span> CAPTURAR HOJA
+            <span class="material-icons">photo_camera</span> ESCANEAR HOJA
         </button>
 
         <div id="processingUI" style="display: none;">
             <div class="spinner"></div>
             <p id="progressLabel">Mejorando imagen... 0%</p>
+            <div class="progress-bar"><div id="progressFill"></div></div>
             <canvas id="hiddenCanvas" style="display:none;"></canvas>
         </div>
 
         <div id="editBox" style="display: none;">
-            <label>Confirmá o corregí lo que leí:</label>
-            <textarea id="ocrResultText"></textarea>
-            <button id="goGoogle" class="action-btn google-btn">
-                <span class="material-icons">rocket_launch</span> ENVIAR A PROFESOR IA
+            <div class="success-badge">
+                <span class="material-icons">check_circle</span>
+                <span>Lectura completada</span>
+            </div>
+            
+            <label for="ocrResultText">Revisá el texto extraído:</label>
+            <textarea id="ocrResultText" placeholder="El texto aparecerá aquí..."></textarea>
+            
+            <button id="goGoogle" class="action-btn gemini-btn">
+                <span class="material-icons">auto_awesome</span> ANALIZAR CON GEMINI
             </button>
-            <p class="small-hint">Tocá arriba para corregir el texto si es necesario.</p>
+            <p class="hint">Al tocar, se copiará el prompt y se abrirá la IA.</p>
         </div>
 
-        <p class="footer-id">ID: <span id="hojaDisplay">...</span></p>
+        <p class="footer-id">Hoja ID: <span id="hojaDisplay">...</span></p>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // 1. Obtener ID de la hoja desde la URL (?hoja=nombre)
             const urlParams = new URLSearchParams(window.location.search);
             const hojaID = urlParams.get('hoja') || 'PROFESOR';
             document.getElementById('hojaDisplay').textContent = hojaID;
@@ -50,63 +60,90 @@
             const mainButton = document.getElementById('mainButton');
             const processingUI = document.getElementById('processingUI');
             const progressLabel = document.getElementById('progressLabel');
+            const progressFill = document.getElementById('progressFill');
             const editBox = document.getElementById('editBox');
             const ocrTextarea = document.getElementById('ocrResultText');
             const statusText = document.getElementById('statusText');
             const canvas = document.getElementById('hiddenCanvas');
 
+            // --- PASO 1: ABRIR CÁMARA ---
             mainButton.onclick = () => cameraInput.click();
 
+            // --- PASO 2: PROCESAR IMAGEN Y OCR ---
             cameraInput.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
                 mainButton.style.display = 'none';
                 processingUI.style.display = 'block';
-                statusText.innerText = "Analizando contenido...";
+                statusText.innerText = "Trabajando en la hoja...";
 
                 const img = new Image();
                 img.src = URL.createObjectURL(file);
+                
                 img.onload = async () => {
-                    // PRE-PROCESAMIENTO: Convertir a B/N y aumentar contraste
                     const ctx = canvas.getContext('2d');
+                    // Ajustamos el canvas al tamaño de la foto
                     canvas.width = img.width;
                     canvas.height = img.height;
                     ctx.drawImage(img, 0, 0);
                     
+                    // FILTRO DE IMAGEN: Blanco y Negro con Contraste para mejor OCR
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
                     for (let i = 0; i < data.length; i += 4) {
                         const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                        const threshold = 128; // Filtro de umbral
+                        const threshold = 130; // Ajuste de sensibilidad
                         const val = avg > threshold ? 255 : 0;
                         data[i] = data[i+1] = data[i+2] = val;
                     }
                     ctx.putImageData(imageData, 0, 0);
 
-                    // INICIAR TESSERACT CON LA IMAGEN LIMPIA
-                    const worker = await Tesseract.createWorker('spa');
-                    const { data: { text } } = await worker.recognize(canvas.toDataURL());
-                    await worker.terminate();
+                    try {
+                        // INICIAR TESSERACT OCR
+                        const worker = await Tesseract.createWorker('spa', 1, {
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    let p = Math.floor(m.progress * 100);
+                                    progressFill.style.width = p + "%";
+                                    progressLabel.innerText = `Leyendo contenido... ${p}%`;
+                                }
+                            }
+                        });
 
-                    // Mostrar para editar
-                    processingUI.style.display = 'none';
-                    editBox.style.display = 'block';
-                    ocrTextarea.value = text.trim();
-                    statusText.innerText = "¡Lectura completada!";
-                    
-                    // Copiar prompt inicial
-                    copyToClipboard(`Analizá este texto de mi hoja: ${text}`);
+                        const { data: { text } } = await worker.recognize(canvas.toDataURL());
+                        await worker.terminate();
+
+                        // Mostrar interfaz de edición
+                        processingUI.style.display = 'none';
+                        editBox.style.display = 'block';
+                        ocrTextarea.value = text.trim();
+                        statusText.innerText = "¡Todo listo!";
+
+                    } catch (err) {
+                        alert("Hubo un error al procesar. Intentá con más luz.");
+                        location.reload();
+                    }
                 };
             };
 
-            document.getElementById('goGoogle').onclick = () => {
+            // --- PASO 3: ENVIAR A GEMINI ---
+            document.getElementById('goGoogle').onclick = function() {
                 const finalContent = ocrTextarea.value;
-                const superPrompt = `Soy tu alumno con la hoja ${hojaID}. Analizá este texto que escaneé: "${finalContent}". Actuá como profesor experto.`;
+                if (!finalContent) return alert("El texto está vacío.");
+
+                // El "Super Prompt" que le da el rol a la IA
+                const superPrompt = `Hola Gemini. Actuá como un profesor experto. Analizá este contenido que acabo de escanear de una hoja de trabajo (ID: ${hojaID}): "${finalContent}". Explicame de qué trata y cómo puedo resolverlo de forma didáctica.`;
+                
+                // Copiar por si acaso (seguridad)
                 copyToClipboard(superPrompt);
-                window.open("https://www.google.com/search?q=" + encodeURIComponent(superPrompt), "_blank");
+
+                // Abrir directamente en la App/Pestaña de Gemini
+                const geminiUrl = "https://gemini.google.com/app?prompt=" + encodeURIComponent(superPrompt);
+                window.open(geminiUrl, "_blank");
             };
 
+            // Función para copiar al portapapeles
             function copyToClipboard(text) {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -119,27 +156,138 @@
     </script>
 
     <style>
-        body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; }
-        .container { background-color: #111; width: 100%; max-width: 380px; padding: 35px 25px; border-radius: 30px; border: 1px solid #222; text-align: center; }
-        
-        h1 { font-size: 1.5rem; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; margin-bottom: 5px; }
-        p { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
+        /* CSS: Estética Dark Premium / Google IA */
+        :root {
+            --bg: #000000;
+            --card: #111111;
+            --primary: #4285f4;
+            --secondary: #9b72cb;
+            --accent: #34a853;
+            --text: #ffffff;
+            --muted: #888888;
+        }
 
-        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; text-transform: uppercase; }
-        .capture-btn { background: #4285f4; color: white; }
-        .google-btn { background: #34a853; color: white; margin-top: 15px; }
+        body {
+            background-color: var(--bg);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-        #editBox { text-align: left; margin-top: 10px; }
-        #editBox label { font-size: 0.8rem; color: #4285f4; font-weight: bold; margin-bottom: 8px; display: block; }
-        #ocrResultText { width: 100%; height: 120px; background: #222; color: #eee; border: 1px solid #444; border-radius: 10px; padding: 10px; font-family: sans-serif; font-size: 0.9rem; box-sizing: border-box; }
-        
-        .small-hint { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
+        .container {
+            background-color: var(--card);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 25px;
+            border-radius: 35px;
+            text-align: center;
+            border: 1px solid #222;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
 
-        /* Spinner animación */
-        .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-left-color: #4285f4; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        /* Encabezado */
+        h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        .live-icon {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        p#statusText {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        /* Botones */
+        .action-btn {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+        .capture-btn {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px rgba(66, 133, 244, 0.3);
+        }
+        .gemini-btn {
+            background-color: white;
+            color: black;
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+        .action-btn:active { transform: scale(0.95); }
+
+        /* Procesamiento */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .footer-id { margin-top: 30px; font-size: 0.7rem; color: #333; }
-    </style>
-</body>
-</html>
+        .progress-bar {
+            background: #222;
+            height: 8px;
+            border-radius: 10px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        #progressFill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        #progressLabel { font-size: 0.8rem; color: var(--primary); font-weight: bold; }
+
+        /* Editor */
+        #editBox { text-align: left; margin-top: 20px; }
+        .success-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        label { color: var(--muted); font-size: 0.8rem; margin-bottom: 8px; display: block; }
+        textarea {
+            width: 100%;
+            height: 140px;
+            background: #1a1a1a;
+            color: #eee;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 0.9rem;
+            line-height: 1
