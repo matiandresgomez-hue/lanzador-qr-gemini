@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesor IA | Vision Pro</title>
+    <title>Profesor IA | Modo Nativo</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
@@ -15,7 +15,7 @@
         
         <div class="status-card">
             <p>Estado: <b>Listo para analizar</b></p>
-            <p class="desc">Al tocar, se copia la instrucción y saltamos al <b>Modo IA</b> de Google.</p>
+            <p class="desc">Al tocar, saltaremos a la pestaña <b>IA/Gemini</b> de la izquierda.</p>
         </div>
         
         <a id="botonLanzar" href="#" target="_blank" class="action-btn magic-btn">
@@ -25,16 +25,15 @@
         <div class="instructions">
             <div class="step">
                 <span class="material-icons">content_paste</span>
-                <p>1. <b>Pegá</b> el texto que ya se copió.</p>
+                <p>1. <b>Pegá</b> el texto (ya se copió solo).</p>
             </div>
             <div class="step">
                 <span class="material-icons">photo_camera</span>
-                <p>2. Usá la <b>cámara</b> para mostrar la hoja.</p>
+                <p>2. Usá la <b>cámara</b> para la hoja.</p>
             </div>
         </div>
 
         <p class="footer">ID: <span id="hojaDisplay">...</span></p>
-        
         <textarea id="copyText" style="position: absolute; left: -9999px;"></textarea>
     </div>
 
@@ -44,61 +43,53 @@
             const hojaID = urlParams.get('hoja') || 'PROFESOR';
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt diseñado para que Google "entienda" que tiene que activar la IA
             const promptFinal = `Responde en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
             document.getElementById('copyText').value = promptFinal;
 
             const btn = document.getElementById('botonLanzar');
+            const encodedPrompt = encodeURIComponent(promptFinal);
+
+            // --- EL AJUSTE MAESTRO ---
+            // 1. Probamos con udm=18 que es el estándar de IA.
+            // 2. Agregamos 'pfe=ia' para forzar el motor de inteligencia artificial.
+            const googleSearchUrl = `https://www.google.com/search?q=${encodedPrompt}&udm=18&pfe=ia`;
             
-            // LA MAGIA: El parámetro &udm=18 suele forzar la vista de IA/Gemini en Google Search
-            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=18";
-            btn.href = searchUrl;
+            // 3. Intentamos un "Intent" que abra la App de Google directamente en esa solapa
+            const intentUrl = `intent://www.google.com/search?q=${encodedPrompt}&udm=18#Intent;scheme=https;package=com.google.android.googlequicksearchbox;S.android.intent.extra.REFERRER_NAME=https://www.google.com;end`;
+
+            // Si es Android, usamos el Intent para que no abra Chrome, sino la App de Google
+            btn.href = /Android/i.test(navigator.userAgent) ? intentUrl : googleSearchUrl;
 
             btn.onclick = function() {
                 const textArea = document.getElementById('copyText');
                 textArea.select();
                 document.execCommand('copy');
                 
-                this.innerHTML = '<span class="material-icons">check_circle</span> ABRIENDO IA...';
-                this.style.background = 'linear-gradient(90deg, #34a853, #1e8e3e)';
+                this.innerHTML = '<span class="material-icons">check_circle</span> ENTRANDO A IA...';
+                this.style.background = 'linear-gradient(90deg, #4285f4, #9b72cb)';
             };
         });
     </script>
 
     <style>
         :root { --blue: #4285f4; --purple: #9b72cb; --green: #34a853; --dark: #0a0a0a; }
-        
         body { background-color: var(--dark); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; }
-        
         .container { background-color: #111; width: 100%; max-width: 360px; padding: 40px 25px; border-radius: 40px; text-align: center; border: 1px solid #222; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-        
-        .live-header { margin-bottom: 25px; }
         .live-icon { font-size: 3.5rem; background: linear-gradient(45deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 2s infinite; }
-        h1 { font-size: 1.5rem; margin: 0; letter-spacing: -0.5px; }
-        
+        h1 { font-size: 1.5rem; margin: 0; }
         .status-card { background: #1a1a1a; padding: 15px; border-radius: 20px; margin-bottom: 30px; border: 1px solid #222; }
         .status-card p { margin: 0; font-size: 0.9rem; color: #888; }
         .status-card b { color: var(--green); }
         .desc { font-size: 0.75rem !important; margin-top: 5px !important; }
-
-        .action-btn { width: 100%; padding: 22px; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 12px; text-decoration: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; box-sizing: border-box; }
-        
+        .action-btn { width: 100%; padding: 22px; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 12px; text-decoration: none; transition: 0.3s; text-transform: uppercase; box-sizing: border-box; }
         .magic-btn { background: white; color: black; box-shadow: 0 10px 30px rgba(255,255,255,0.1); }
         .magic-btn:active { transform: scale(0.94); }
-
         .instructions { margin-top: 30px; text-align: left; background: #0a0a0a; padding: 20px; border-radius: 20px; }
         .step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .step:last-child { margin-bottom: 0; }
         .step .material-icons { color: var(--blue); font-size: 1.2rem; }
         .step p { margin: 0; font-size: 0.85rem; color: #ccc; }
-
         .footer { margin-top: 35px; font-size: 0.65rem; color: #333; text-transform: uppercase; letter-spacing: 3px; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </body>
 </html>
