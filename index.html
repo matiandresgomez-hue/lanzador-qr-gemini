@@ -3,38 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente IA | OCR Nativo</title>
+    <title>Asistente IA | OCR Optimizado</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">psychology</span>
-            <h1>IA Vision Pro</h1>
+            <span class="material-icons live-icon">document_scanner</span>
+            <h1>Escáner Inteligente</h1>
         </div>
 
-        <p id="statusText">Paso 1: Sacá una foto nítida de la hoja para que la IA la lea.</p>
+        <p id="statusText">Paso 1: Sacá una foto de cerca y con buena luz.</p>
 
         <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
         
         <button id="mainButton" class="action-btn capture-btn">
-            <span class="material-icons">photo_camera</span> CAPTURAR Y LEER
+            <span class="material-icons">photo_camera</span> CAPTURAR HOJA
         </button>
 
-        <div id="progressContainer" style="display: none;">
-            <div class="progress-bar"><div id="progressFill"></div></div>
-            <p id="progressLabel">Leyendo texto... 0%</p>
+        <div id="processingUI" style="display: none;">
+            <div class="spinner"></div>
+            <p id="progressLabel">Mejorando imagen... 0%</p>
+            <canvas id="hiddenCanvas" style="display:none;"></canvas>
         </div>
 
-        <div id="resultBox" style="display: none;">
-            <div class="success-card">
-                <span class="material-icons">check_circle</span>
-                <p>Hoja procesada con éxito</p>
-            </div>
+        <div id="editBox" style="display: none;">
+            <label>Confirmá o corregí lo que leí:</label>
+            <textarea id="ocrResultText"></textarea>
             <button id="goGoogle" class="action-btn google-btn">
-                <span class="material-icons">rocket_launch</span> ABRIR ASISTENTE IA
+                <span class="material-icons">rocket_launch</span> ENVIAR A PROFESOR IA
             </button>
+            <p class="small-hint">Tocá arriba para corregir el texto si es necesario.</p>
         </div>
 
         <p class="footer-id">ID: <span id="hojaDisplay">...</span></p>
@@ -48,14 +48,12 @@
 
             const cameraInput = document.getElementById('cameraInput');
             const mainButton = document.getElementById('mainButton');
-            const progressContainer = document.getElementById('progressContainer');
-            const progressFill = document.getElementById('progressFill');
+            const processingUI = document.getElementById('processingUI');
             const progressLabel = document.getElementById('progressLabel');
-            const resultBox = document.getElementById('resultBox');
+            const editBox = document.getElementById('editBox');
+            const ocrTextarea = document.getElementById('ocrResultText');
             const statusText = document.getElementById('statusText');
-            const goGoogle = document.getElementById('goGoogle');
-
-            let textoExtraido = "";
+            const canvas = document.getElementById('hiddenCanvas');
 
             mainButton.onclick = () => cameraInput.click();
 
@@ -63,45 +61,50 @@
                 const file = e.target.files[0];
                 if (!file) return;
 
-                // Preparar interfaz para procesar
                 mainButton.style.display = 'none';
-                progressContainer.style.display = 'block';
-                statusText.innerText = "Procesando imagen con OCR...";
+                processingUI.style.display = 'block';
+                statusText.innerText = "Analizando contenido...";
 
-                try {
-                    // INICIAR OCR
-                    const worker = await Tesseract.createWorker('spa', 1, {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                let p = Math.floor(m.progress * 100);
-                                progressFill.style.width = p + "%";
-                                progressLabel.innerText = `Leyendo texto... ${p}%`;
-                            }
-                        }
-                    });
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = async () => {
+                    // PRE-PROCESAMIENTO: Convertir a B/N y aumentar contraste
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                        const threshold = 128; // Filtro de umbral
+                        const val = avg > threshold ? 255 : 0;
+                        data[i] = data[i+1] = data[i+2] = val;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
 
-                    const { data: { text } } = await worker.recognize(file);
-                    textoExtraido = text;
+                    // INICIAR TESSERACT CON LA IMAGEN LIMPIA
+                    const worker = await Tesseract.createWorker('spa');
+                    const { data: { text } } = await worker.recognize(canvas.toDataURL());
                     await worker.terminate();
 
-                    // Finalizar
-                    progressContainer.style.display = 'none';
-                    resultBox.style.display = 'block';
-                    statusText.innerText = "¡Listo! La IA ya sabe qué dice tu hoja.";
-
-                    // ARMAR Y COPIAR PROMPT AUTOMÁTICAMENTE
-                    const superPrompt = `Soy tu alumno. Analizá este texto que acabo de escanear de mi hoja [ID: ${hojaID}]: "${textoExtraido.substring(0, 1000)}". Actuá como profesor experto y explicame el tema.`;
-                    copyToClipboard(superPrompt);
-
-                } catch (err) {
-                    alert("Error al leer la imagen. Intentá de nuevo con más luz.");
-                    location.reload();
-                }
+                    // Mostrar para editar
+                    processingUI.style.display = 'none';
+                    editBox.style.display = 'block';
+                    ocrTextarea.value = text.trim();
+                    statusText.innerText = "¡Lectura completada!";
+                    
+                    // Copiar prompt inicial
+                    copyToClipboard(`Analizá este texto de mi hoja: ${text}`);
+                };
             };
 
-            goGoogle.onclick = () => {
-                const promptFinal = `Soy tu alumno con la hoja ${hojaID}. Analizá el texto escaneado: ${textoExtraido.substring(0, 500)}`;
-                window.open("https://www.google.com/search?q=" + encodeURIComponent(promptFinal), "_blank");
+            document.getElementById('goGoogle').onclick = () => {
+                const finalContent = ocrTextarea.value;
+                const superPrompt = `Soy tu alumno con la hoja ${hojaID}. Analizá este texto que escaneé: "${finalContent}". Actuá como profesor experto.`;
+                copyToClipboard(superPrompt);
+                window.open("https://www.google.com/search?q=" + encodeURIComponent(superPrompt), "_blank");
             };
 
             function copyToClipboard(text) {
@@ -117,24 +120,26 @@
 
     <style>
         body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; }
-        .container { background-color: #111; width: 100%; max-width: 360px; padding: 40px 20px; border-radius: 30px; text-align: center; border: 1px solid #222; }
-        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
-        .live-icon { font-size: 3rem; color: #4285f4; margin-bottom: 10px; }
-        p { color: #888; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.4; }
+        .container { background-color: #111; width: 100%; max-width: 380px; padding: 35px 25px; border-radius: 30px; border: 1px solid #222; text-align: center; }
         
-        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; box-sizing: border-box; transition: 0.3s; text-transform: uppercase; cursor: pointer; }
-        .capture-btn { background-color: #4285f4; color: white; }
-        .google-btn { background-color: white; color: black; }
+        h1 { font-size: 1.5rem; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; margin-bottom: 5px; }
+        p { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
 
-        /* Barra de progreso */
-        .progress-bar { background: #222; border-radius: 50px; height: 10px; width: 100%; margin-bottom: 10px; overflow: hidden; }
-        #progressFill { background: #4285f4; height: 100%; width: 0%; transition: width 0.2s; }
-        #progressLabel { font-size: 0.75rem; color: #4285f4; font-weight: bold; }
+        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; text-transform: uppercase; }
+        .capture-btn { background: #4285f4; color: white; }
+        .google-btn { background: #34a853; color: white; margin-top: 15px; }
 
-        .success-card { background: #1a1a1a; border: 1px solid #34a853; padding: 15px; border-radius: 15px; margin-bottom: 20px; color: #34a853; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .success-card p { margin: 0; color: #34a853; font-weight: bold; }
+        #editBox { text-align: left; margin-top: 10px; }
+        #editBox label { font-size: 0.8rem; color: #4285f4; font-weight: bold; margin-bottom: 8px; display: block; }
+        #ocrResultText { width: 100%; height: 120px; background: #222; color: #eee; border: 1px solid #444; border-radius: 10px; padding: 10px; font-family: sans-serif; font-size: 0.9rem; box-sizing: border-box; }
+        
+        .small-hint { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
 
-        .footer-id { margin-top: 30px; font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
+        /* Spinner animación */
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-left-color: #4285f4; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .footer-id { margin-top: 30px; font-size: 0.7rem; color: #333; }
     </style>
 </body>
 </html>
