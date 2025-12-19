@@ -3,96 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente IA | OCR Pro</title>
+    <title>Profesor IA | Vision Pro</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        :root { --bg: #000; --card: #111; --primary: #4285f4; --accent: #34a853; --text: #eee; }
+        body { background-color: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: var(--text); padding: 20px; box-sizing: border-box; }
+        .container { background-color: var(--card); width: 100%; max-width: 400px; padding: 35px 25px; border-radius: 30px; text-align: center; border: 1px solid #222; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        
+        /* Header */
+        h1 { font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .icon-header { font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; }
+        p.status { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
+
+        /* Botones */
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; text-decoration: none; }
+        .btn-capture { background-color: var(--primary); color: white; }
+        .btn-google { background-color: white; color: black; margin-top: 15px; display: none; }
+        .btn:active { transform: scale(0.96); }
+
+        /* Loader */
+        #loader { display: none; margin: 20px 0; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .bar-bg { background: #222; height: 6px; border-radius: 10px; overflow: hidden; width: 100%; }
+        #bar-fill { background: var(--primary); height: 100%; width: 0%; transition: 0.3s; }
+
+        /* Resultado */
+        #result-area { display: none; margin-top: 20px; text-align: left; }
+        textarea { width: 100%; height: 120px; background: #1a1a1a; color: #ccc; border: 1px solid #333; border-radius: 12px; padding: 12px; box-sizing: border-box; font-size: 0.85rem; resize: none; }
+        .label-edit { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 5px; display: block; }
+
+        .footer { margin-top: 30px; font-size: 0.65rem; color: #333; letter-spacing: 2px; }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="live-header">
-            <span class="material-icons live-icon">document_scanner</span>
-            <h1>Profesor Vision IA</h1>
-        </div>
-
-        <p id="statusText">Paso 1: Sacá una foto nítida y bien iluminada.</p>
+        <span class="material-icons icon-header">auto_awesome</span>
+        <h1>Vision Profesor IA</h1>
+        <p id="main-status" class="status">Paso 1: Capturá la hoja de trabajo.</p>
 
         <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display: none;">
         
-        <button id="mainButton" class="action-btn capture-btn">
-            <span class="material-icons">photo_camera</span> ESCANEAR AHORA
+        <button id="btn-scan" class="btn btn-capture">
+            <span class="material-icons">photo_camera</span> ESCANEAR HOJA
         </button>
 
-        <div id="processingUI" style="display: none;">
+        <div id="loader">
             <div class="spinner"></div>
-            <p id="progressLabel">Limpiando imagen... 0%</p>
-            <div class="progress-bar"><div id="progressFill"></div></div>
-            <canvas id="hiddenCanvas" style="display:none;"></canvas>
+            <p id="load-text" style="font-size: 0.8rem; color: var(--primary);">Mejorando imagen...</p>
+            <div class="bar-bg"><div id="bar-fill"></div></div>
         </div>
 
-        <div id="editBox" style="display: none;">
-            <div class="success-badge">
-                <span class="material-icons">verified</span>
-                <span>Texto detectado</span>
-            </div>
-            
-            <textarea id="ocrResultText" placeholder="Revisá el texto aquí..."></textarea>
-            
-            <button id="goSearch" class="action-btn search-btn">
-                <span class="material-icons">bolt</span> ENVIAR A PROFESOR IA
+        <div id="result-area">
+            <span class="label-edit">REVISÁ EL TEXTO LEÍDO:</span>
+            <textarea id="ocr-text"></textarea>
+            <button id="btn-go" class="btn btn-google">
+                <span class="material-icons">psychology</span> ANALIZAR CON IA
             </button>
-            <p class="hint">Si algo se leyó mal, podés corregirlo arriba antes de enviar.</p>
         </div>
 
-        <p class="footer-id">ID: <span id="hojaDisplay">...</span></p>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <p class="footer">HOJA ID: <span id="hoja-id">...</span></p>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hojaID = urlParams.get('hoja') || 'PROFESOR';
-            document.getElementById('hojaDisplay').textContent = hojaID;
+            const params = new URLSearchParams(window.location.search);
+            const hojaID = params.get('hoja') || 'PROFESOR';
+            document.getElementById('hoja-id').textContent = hojaID;
 
-            const cameraInput = document.getElementById('cameraInput');
-            const mainButton = document.getElementById('mainButton');
-            const processingUI = document.getElementById('processingUI');
-            const progressFill = document.getElementById('progressFill');
-            const progressLabel = document.getElementById('progressLabel');
-            const editBox = document.getElementById('editBox');
-            const ocrTextarea = document.getElementById('ocrResultText');
-            const canvas = document.getElementById('hiddenCanvas');
+            const input = document.getElementById('cameraInput');
+            const btnScan = document.getElementById('btn-scan');
+            const loader = document.getElementById('loader');
+            const barFill = document.getElementById('bar-fill');
+            const resultArea = document.getElementById('result-area');
+            const ocrText = document.getElementById('ocr-text');
+            const btnGo = document.getElementById('btn-go');
+            const mainStatus = document.getElementById('main-status');
 
-            mainButton.onclick = () => cameraInput.click();
+            btnScan.onclick = () => input.click();
 
-            cameraInput.onchange = async (e) => {
+            input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
-                mainButton.style.display = 'none';
-                processingUI.style.display = 'block';
+                btnScan.style.display = 'none';
+                loader.style.display = 'block';
+                mainStatus.innerText = "Leyendo contenido...";
 
                 const img = new Image();
                 img.src = URL.createObjectURL(file);
-                
                 img.onload = async () => {
-                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                    
-                    // Redimensionar para optimizar lectura
-                    const scale = Math.min(1500 / img.width, 1500 / img.height, 1);
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
-                    
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    // --- FILTRO DE BINARIZACIÓN (Mejora el OCR) ---
+                    const canvas = document.getElementById('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    // FILTRO PRO: B/N para que el OCR no falle
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const data = imageData.data;
-                    for (let i = 0; i < data.length; i += 4) {
-                        // Convertir a escala de grises con peso real
-                        const avg = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                        // Umbral dinámico: si es más oscuro que 120, se vuelve negro (0), si no, blanco (255)
-                        const val = avg > 120 ? 255 : 0; 
-                        data[i] = data[i+1] = data[i+2] = val;
+                    const d = imageData.data;
+                    for (let i = 0; i < d.length; i += 4) {
+                        const avg = (d[i] + d[i+1] + d[i+2]) / 3;
+                        const val = avg > 120 ? 255 : 0;
+                        d[i] = d[i+1] = d[i+2] = val;
                     }
                     ctx.putImageData(imageData, 0, 0);
 
@@ -100,35 +116,39 @@
                         const worker = await Tesseract.createWorker('spa', 1, {
                             logger: m => {
                                 if (m.status === 'recognizing text') {
-                                    let p = Math.floor(m.progress * 100);
-                                    progressFill.style.width = p + "%";
-                                    progressLabel.innerText = `Leyendo... ${p}%`;
+                                    const p = Math.floor(m.progress * 100);
+                                    barFill.style.width = p + "%";
+                                    document.getElementById('load-text').innerText = `Leyendo... ${p}%`;
                                 }
                             }
                         });
-                        
-                        // Usamos la imagen filtrada del canvas
-                        const { data: { text } } = await worker.recognize(canvas.toDataURL('image/jpeg', 0.8));
+                        const { data: { text } } = await worker.recognize(canvas.toDataURL());
                         await worker.terminate();
 
-                        processingUI.style.display = 'none';
-                        editBox.style.display = 'block';
-                        ocrTextarea.value = text.trim();
+                        loader.style.display = 'none';
+                        resultArea.style.display = 'block';
+                        btnGo.style.display = 'flex';
+                        ocrText.value = text.trim();
+                        mainStatus.innerText = "¡Lectura lista!";
+                        
                     } catch (err) {
-                        alert("Error de lectura. Probá con más luz.");
+                        alert("Error de lectura. Intentá con más luz.");
                         location.reload();
                     }
                 };
             };
 
-            document.getElementById('goSearch').onclick = function() {
-                const text = ocrTextarea.value;
-                if (!text) return;
+            btnGo.onclick = () => {
+                const finalContent = ocrText.value;
+                if (!finalContent) return;
 
-                // Prompt optimizado para Google Search
-                const superPrompt = `Gemini analizá y explicá este ejercicio de la hoja ${hojaID}: ${text}`;
+                // EL SECRETO DEL ÉXITO:
+                // 1. Empezamos con "IA Gemini" o "Google AI" para gatillar el panel.
+                // 2. NO usamos comillas alrededor del texto del OCR.
+                // 3. Agregamos la orden de "profesor experto".
+                const superPrompt = `IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}: ${finalContent}`;
                 
-                // Copiado de seguridad
+                // Copiado de respaldo
                 const el = document.createElement('textarea');
                 el.value = superPrompt;
                 document.body.appendChild(el);
@@ -136,4 +156,11 @@
                 document.execCommand('copy');
                 document.body.removeChild(el);
 
-                // Abrimos Google Search (Modo Respuesta IA
+                // Lanzar búsqueda (activará el panel de IA arriba)
+                const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(superPrompt);
+                window.open(searchUrl, "_blank");
+            };
+        });
+    </script>
+</body>
+</html>
