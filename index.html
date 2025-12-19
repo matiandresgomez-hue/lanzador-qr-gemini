@@ -13,15 +13,15 @@
             <h1>Asistente IA</h1>
         </div>
         
-        <p>Al tocar el botón, se copiará la instrucción y se abrirá el buscador. Solo tenés que <b>pegar</b> el texto y usar la cámara.</p>
+        <p>Al tocar el botón, se copiará la instrucción y saltaremos al <b>Modo IA</b>.</p>
         
         <a id="botonLanzar" href="#" target="_blank" class="action-btn magic-btn">
-            <span class="material-icons">rocket_launch</span> INICIAR EXPERIENCIA
+            <span class="material-icons">bolt</span> INICIAR MODO IA
         </a>
 
         <div class="info-card">
-            <span class="material-icons">info</span>
-            <p>Se abrirá en una nueva pestaña de Chrome. Mantené presionado el buscador para <b>pegar</b>.</p>
+            <span class="material-icons">content_paste</span>
+            <p>1. <b>Pegá</b> el texto que ya se copió.<br>2. Usá la <b>cámara</b> para la hoja.</p>
         </div>
 
         <p class="footer">ID Hoja: <span id="hojaDisplay">...</span></p>
@@ -35,24 +35,22 @@
             const hojaID = urlParams.get('hoja') || 'PROFESOR';
             document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // Prompt estratégico (Sin comillas para evitar errores de búsqueda)
+            // Prompt estratégico sin comillas
             const promptFinal = `Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
             document.getElementById('copyText').value = promptFinal;
 
             const btn = document.getElementById('botonLanzar');
             
-            // Link de búsqueda estándar (El que mejor abre Chrome)
-            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal);
+            // udm=18 suele ser IA. Si te manda a Foros, probá cambiar el 18 por 14 o 1
+            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=18";
             btn.href = searchUrl;
 
             btn.onclick = function() {
-                // Ejecuta el copiado
                 const textArea = document.getElementById('copyText');
                 textArea.select();
                 document.execCommand('copy');
                 
-                // Feedback visual de éxito
-                this.innerHTML = '<span class="material-icons">check</span> ¡COPIADO Y ABRIENDO!';
+                this.innerHTML = '<span class="material-icons">check</span> ¡COPIADO Y LANZANDO!';
                 this.style.backgroundColor = '#34a853';
                 this.style.color = '#fff';
             };
@@ -60,72 +58,17 @@
     </script>
 
     <style>
-        body { 
-            background-color: #000; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            color: white; 
-            padding: 20px; 
-        }
-        .container { 
-            background-color: #111; 
-            width: 100%; 
-            max-width: 350px; 
-            padding: 45px 25px; 
-            border-radius: 35px; 
-            text-align: center; 
-            border: 1px solid #222; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.5); 
-        }
-        h1 { 
-            font-size: 1.6rem; 
-            margin: 0; 
-            background: linear-gradient(45deg, #4285f4, #34a853); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            font-weight: bold; 
-        }
+        body { background-color: #000; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; }
+        .container { background-color: #111; width: 100%; max-width: 350px; padding: 45px 25px; border-radius: 35px; text-align: center; border: 1px solid #222; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        h1 { font-size: 1.6rem; margin: 0; background: linear-gradient(45deg, #4285f4, #34a853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
         .live-icon { font-size: 3.5rem; color: #4285f4; margin-bottom: 15px; }
         p { color: #888; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
-        
-        .action-btn { 
-            width: 100%; 
-            padding: 22px; 
-            border: none; 
-            border-radius: 18px; 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 10px; 
-            text-decoration: none; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            text-transform: uppercase; 
-            box-sizing: border-box; 
-        }
-        
+        .action-btn { width: 100%; padding: 22px; border: none; border-radius: 18px; font-size: 1.1rem; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; }
         .magic-btn { background: #fff; color: #000; }
         .magic-btn:active { transform: scale(0.96); }
-
-        .info-card { 
-            margin-top: 30px; 
-            background: #1a1a1a; 
-            padding: 15px; 
-            border-radius: 15px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            border: 1px solid #333;
-        }
+        .info-card { margin-top: 30px; background: #1a1a1a; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 10px; border: 1px solid #333; }
         .info-card .material-icons { color: #4285f4; font-size: 1.2rem; }
         .info-card p { margin: 0; font-size: 0.8rem; color: #aaa; text-align: left; }
-
         .footer { margin-top: 35px; font-size: 0.7rem; color: #333; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </body>
