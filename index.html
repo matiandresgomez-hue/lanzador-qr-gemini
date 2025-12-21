@@ -47,7 +47,8 @@
         </button>
 
         <div class="info-card">
-            <p>Al elegir, se copia el comando. Luego <b>pegá</b> y usá la <b>cámara</b> en Google.</p>
+            <span class="material-icons" style="color:#4285f4">info</span>
+            <p>Al elegir, pegá el texto en Google y <b>toca el icono de la cámara</b> para capturar la hoja.</p>
         </div>
 
         <p class="footer">ID: <span id="hojaDisplay">...</span></p>
@@ -60,33 +61,34 @@
         document.getElementById('hojaDisplay').textContent = hojaID;
 
         function lanzar(tipo) {
-            let promptBase = `Hola. Responde siempre en español. `;
+            // El prompt ahora incluye la instrucción de prender la cámara
+            let promptBase = `Hola. Responde siempre en español. Voy a usar la cámara para mostrarte mi hoja (ID: ${hojaID}). `;
             let instruccion = "";
 
             switch(tipo) {
                 case 'PROFESOR':
-                    instruccion = `IA Gemini actúa como profesor experto. Analizá esta hoja (ID: ${hojaID}) y explicame el tema paso a paso:`;
+                    instruccion = `IA Gemini actúa como profesor experto: analizá la imagen de la hoja y explicame el tema paso a paso.`;
                     break;
                 case 'RESUMEN':
-                    instruccion = `Resumí de forma concisa los puntos más importantes de esta hoja (ID: ${hojaID}) en una lista de bullets:`;
+                    instruccion = `Analizá la imagen de la hoja y haceme un resumen corto con los puntos clave.`;
                     break;
                 case 'PDF':
-                    instruccion = `Transcribí fielmente todo el texto de esta hoja (ID: ${hojaID}) dándole un formato limpio y profesional como para un documento PDF:`;
+                    instruccion = `Leé el texto de la imagen de la hoja y transcribilo de forma limpia y profesional.`;
                     break;
                 case 'QUIZ':
-                    instruccion = `Analizá esta hoja (ID: ${hojaID}) y generá 3 preguntas de práctica con sus respuestas para ver si entendí el tema:`;
+                    instruccion = `Analizá la imagen de la hoja y generá 3 preguntas de práctica para ver si entendí.`;
                     break;
             }
 
             const promptFinal = promptBase + instruccion;
             
-            // Copiar
+            // Copiar al portapapeles
             const textArea = document.getElementById('copyText');
             textArea.value = promptFinal;
             textArea.select();
             document.execCommand('copy');
 
-            // Lanzar a Google con udm=50
+            // Lanzar a Google con udm=50 (Modo IA)
             const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50";
             window.open(searchUrl, "_blank");
         }
@@ -94,9 +96,8 @@
 
     <style>
         :root { --blue: #4285f4; --purple: #9b72cb; --green: #34a853; --dark: #0a0a0a; --card: #161616; }
-        body { background-color: var(--dark); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; }
+        body { background-color: var(--dark); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; }
         .container { background-color: var(--card); width: 100%; max-width: 380px; padding: 35px 20px; border-radius: 40px; border: 1px solid #222; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
-        
         .live-header { margin-bottom: 25px; text-align: center; }
         .live-icon { font-size: 3rem; color: var(--blue); margin-bottom: 5px; }
         h1 { font-size: 1.4rem; margin: 0; font-weight: 800; }
@@ -113,14 +114,13 @@
         .btn-text b { font-size: 0.95rem; }
         .btn-text span { font-size: 0.75rem; color: #888; }
 
-        /* Colores sutiles por botón */
         .btn-expert .material-icons { color: var(--blue); }
         .btn-summary .material-icons { color: #fbbc05; }
         .btn-pdf .material-icons { color: #ea4335; }
         .btn-quiz .material-icons { color: var(--green); }
 
-        .info-card { margin-top: 20px; background: #0a0a0a; padding: 15px; border-radius: 15px; border: 1px solid #222; }
-        .info-card p { margin: 0; font-size: 0.75rem; color: #555; text-align: center; line-height: 1.4; }
+        .info-card { margin-top: 20px; background: #0a0a0a; padding: 15px; border-radius: 20px; border: 1px solid #222; display: flex; align-items: center; gap: 10px; }
+        .info-card p { margin: 0; font-size: 0.75rem; color: #777; line-height: 1.4; text-align: left; }
         .footer { margin-top: 25px; font-size: 0.65rem; color: #333; text-transform: uppercase; letter-spacing: 3px; text-align: center; }
     </style>
 </body>
