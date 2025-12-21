@@ -3,174 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesor IA | Vision Pro</title>
+    <title>IA Control Center</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="live-header">
-            <span class="material-icons live-icon">auto_awesome</span>
-            <h1>Vision Profesor IA</h1>
-        </div>
-        
-        <div class="status-card">
-            <p>Estado: <b>Conexión Directa</b></p>
-            <p class="desc">Al tocar, saltaremos a la pestaña de <b>IA (Gemini)</b>.</p>
-        </div>
-        
-        <a id="botonLanzar" href="#" target="_blank" class="action-btn magic-btn">
-            <span class="material-icons">bolt</span> INICIAR MODO IA
-        </a>
-
-        <div class="instructions">
-            <div class="step">
-                <span class="material-icons">content_paste</span>
-                <p>1. <b>Pegá</b> el texto (ya se copió solo).</p>
-            </div>
-            <div class="step">
-                <span class="material-icons">photo_camera</span>
-                <p>2. Usá la <b>cámara</b> para mostrar la hoja.</p>
-            </div>
+            <span class="material-icons live-icon">dashboard_customize</span>
+            <h1>IA Control Center</h1>
+            <p class="subtitle">Elegí la herramienta para tu hoja</p>
         </div>
 
-        <p class="footer">ID DE HOJA: <span id="hojaDisplay">...</span></p>
-        
+        <button class="action-btn btn-expert" onclick="lanzar('PROFESOR')">
+            <span class="material-icons">psychology</span>
+            <div class="btn-text">
+                <b>PROFESOR EXPERTO</b>
+                <span>Explicación y dudas abiertas</span>
+            </div>
+        </button>
+
+        <button class="action-btn btn-summary" onclick="lanzar('RESUMEN')">
+            <span class="material-icons">summarize</span>
+            <div class="btn-text">
+                <b>RESUMIR CONTENIDO</b>
+                <span>Puntos clave y lo más importante</span>
+            </div>
+        </button>
+
+        <button class="action-btn btn-pdf" onclick="lanzar('PDF')">
+            <span class="material-icons">picture_as_pdf</span>
+            <div class="btn-text">
+                <b>TRANSCRIBIR A TEXTO</b>
+                <span>Pasar a limpio para guardar/imprimir</span>
+            </div>
+        </button>
+
+        <button class="action-btn btn-quiz" onclick="lanzar('QUIZ')">
+            <span class="material-icons">quiz</span>
+            <div class="btn-text">
+                <b>EVALUARME</b>
+                <span>Generar preguntas para practicar</span>
+            </div>
+        </button>
+
+        <div class="info-card">
+            <p>Al elegir, se copia el comando. Luego <b>pegá</b> y usá la <b>cámara</b> en Google.</p>
+        </div>
+
+        <p class="footer">ID: <span id="hojaDisplay">...</span></p>
         <textarea id="copyText" style="position: absolute; left: -9999px;"></textarea>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Extraer el nombre de la hoja de la URL (?hoja=nombre)
-            const urlParams = new URLSearchParams(window.location.search);
-            const hojaID = urlParams.get('hoja') || 'PROFESOR';
-            document.getElementById('hojaDisplay').textContent = hojaID;
+        const urlParams = new URLSearchParams(window.location.search);
+        const hojaID = urlParams.get('hoja') || 'PROFESOR';
+        document.getElementById('hojaDisplay').textContent = hojaID;
 
-            // EL PROMPT MÁGICO CON "HOLA"
-            const promptFinal = `Hola. Responde siempre en español. IA Gemini actúa como profesor experto. Analizá y explicá este contenido de la hoja ${hojaID}:`;
-            document.getElementById('copyText').value = promptFinal;
+        function lanzar(tipo) {
+            let promptBase = `Hola. Responde siempre en español. `;
+            let instruccion = "";
 
-            const btn = document.getElementById('botonLanzar');
+            switch(tipo) {
+                case 'PROFESOR':
+                    instruccion = `IA Gemini actúa como profesor experto. Analizá esta hoja (ID: ${hojaID}) y explicame el tema paso a paso:`;
+                    break;
+                case 'RESUMEN':
+                    instruccion = `Resumí de forma concisa los puntos más importantes de esta hoja (ID: ${hojaID}) en una lista de bullets:`;
+                    break;
+                case 'PDF':
+                    instruccion = `Transcribí fielmente todo el texto de esta hoja (ID: ${hojaID}) dándole un formato limpio y profesional como para un documento PDF:`;
+                    break;
+                case 'QUIZ':
+                    instruccion = `Analizá esta hoja (ID: ${hojaID}) y generá 3 preguntas de práctica con sus respuestas para ver si entendí el tema:`;
+                    break;
+            }
+
+            const promptFinal = promptBase + instruccion;
             
-            // --- TU COORDENADA DE BRÚJULA ---
-            // Usamos udm=50 para entrar directo a la pestaña de IA
-            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50";
-            btn.href = searchUrl;
+            // Copiar
+            const textArea = document.getElementById('copyText');
+            textArea.value = promptFinal;
+            textArea.select();
+            document.execCommand('copy');
 
-            btn.onclick = function() {
-                // Ejecutar copiado al portapapeles
-                const textArea = document.getElementById('copyText');
-                textArea.select();
-                document.execCommand('copy');
-                
-                // Feedback visual de lanzamiento
-                this.innerHTML = '<span class="material-icons">check_circle</span> ABRIENDO MODO IA...';
-                this.style.background = 'linear-gradient(90deg, #4285f4, #9b72cb)';
-                this.style.color = '#fff';
-            };
-        });
+            // Lanzar a Google con udm=50
+            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50";
+            window.open(searchUrl, "_blank");
+        }
     </script>
 
     <style>
-        /* Estética Dark Premium / Google Gemini Style */
-        :root {
-            --blue: #4285f4;
-            --purple: #9b72cb;
-            --green: #34a853;
-            --dark: #0a0a0a;
-            --card: #111111;
-        }
+        :root { --blue: #4285f4; --purple: #9b72cb; --green: #34a853; --dark: #0a0a0a; --card: #161616; }
+        body { background-color: var(--dark); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 20px; }
+        .container { background-color: var(--card); width: 100%; max-width: 380px; padding: 35px 20px; border-radius: 40px; border: 1px solid #222; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
         
-        body { 
-            background-color: var(--dark); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            color: white; 
-            padding: 20px; 
-        }
-        
-        .container { 
-            background-color: var(--card); 
-            width: 100%; 
-            max-width: 360px; 
-            padding: 45px 25px; 
-            border-radius: 40px; 
-            text-align: center; 
-            border: 1px solid #222; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8); 
-        }
-        
-        .live-header { margin-bottom: 25px; }
-        .live-icon { 
-            font-size: 3.5rem; 
-            background: linear-gradient(45deg, var(--blue), var(--purple)); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            animation: pulse 2s infinite; 
-        }
-        h1 { font-size: 1.6rem; margin: 0; letter-spacing: -0.5px; font-weight: 700; }
-        
-        .status-card { 
-            background: #1a1a1a; 
-            padding: 15px; 
-            border-radius: 20px; 
-            margin-bottom: 35px; 
-            border: 1px solid #222; 
-        }
-        .status-card p { margin: 0; font-size: 0.9rem; color: #888; }
-        .status-card b { color: var(--green); }
-        .desc { font-size: 0.75rem !important; margin-top: 5px !important; }
+        .live-header { margin-bottom: 25px; text-align: center; }
+        .live-icon { font-size: 3rem; color: var(--blue); margin-bottom: 5px; }
+        h1 { font-size: 1.4rem; margin: 0; font-weight: 800; }
+        .subtitle { font-size: 0.8rem; color: #666; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
 
         .action-btn { 
-            width: 100%; 
-            padding: 22px; 
-            border: none; 
-            border-radius: 20px; 
-            font-size: 1.1rem; 
-            font-weight: 800; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 12px; 
-            text-decoration: none; 
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            text-transform: uppercase; 
-            box-sizing: border-box; 
+            width: 100%; padding: 18px; border: none; border-radius: 20px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;
+            text-align: left; background: #222; color: white; border: 1px solid #333;
         }
-        
-        .magic-btn { background: white; color: black; box-shadow: 0 10px 30px rgba(255,255,255,0.1); }
-        .magic-btn:active { transform: scale(0.94); }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn .material-icons { font-size: 2rem; }
+        .btn-text { display: flex; flex-direction: column; }
+        .btn-text b { font-size: 0.95rem; }
+        .btn-text span { font-size: 0.75rem; color: #888; }
 
-        .instructions { 
-            margin-top: 35px; 
-            text-align: left; 
-            background: #0a0a0a; 
-            padding: 20px; 
-            border-radius: 25px; 
-            border: 1px solid #222;
-        }
-        .step { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .step:last-child { margin-bottom: 0; }
-        .step .material-icons { color: var(--blue); font-size: 1.3rem; }
-        .step p { margin: 0; font-size: 0.85rem; color: #ccc; font-weight: 500; }
+        /* Colores sutiles por botón */
+        .btn-expert .material-icons { color: var(--blue); }
+        .btn-summary .material-icons { color: #fbbc05; }
+        .btn-pdf .material-icons { color: #ea4335; }
+        .btn-quiz .material-icons { color: var(--green); }
 
-        .footer { 
-            margin-top: 40px; 
-            font-size: 0.65rem; 
-            color: #333; 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-            font-weight: bold;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .info-card { margin-top: 20px; background: #0a0a0a; padding: 15px; border-radius: 15px; border: 1px solid #222; }
+        .info-card p { margin: 0; font-size: 0.75rem; color: #555; text-align: center; line-height: 1.4; }
+        .footer { margin-top: 25px; font-size: 0.65rem; color: #333; text-transform: uppercase; letter-spacing: 3px; text-align: center; }
     </style>
 </body>
 </html>
