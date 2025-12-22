@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Control Center | Edición Especial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IA Control Center | Pro</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
@@ -19,7 +19,7 @@
             <span class="material-icons">psychology</span>
             <div class="btn-text">
                 <b>PROFESOR EXPERTO</b>
-                <span>Explicación y dudas abiertas</span>
+                <span>Explicación paso a paso</span>
             </div>
         </button>
 
@@ -27,15 +27,15 @@
             <span class="material-icons">summarize</span>
             <div class="btn-text">
                 <b>RESUMIR CONTENIDO</b>
-                <span>Puntos clave y lo más importante</span>
+                <span>Puntos clave rápidos</span>
             </div>
         </button>
 
         <button class="action-btn btn-pdf" onclick="lanzar('PDF')">
             <span class="material-icons">picture_as_pdf</span>
             <div class="btn-text">
-                <b>TRANSCRIBIR A TEXTO</b>
-                <span>Pasar a limpio para guardar o imprimir</span>
+                <b>TRANSCRIBIR TEXTO</b>
+                <span>Pasar a limpio</span>
             </div>
         </button>
 
@@ -43,128 +43,99 @@
             <span class="material-icons">quiz</span>
             <div class="btn-text">
                 <b>EVALUARME</b>
-                <span>Generar preguntas para practicar</span>
+                <span>Preguntas de práctica</span>
             </div>
         </button>
 
         <div class="info-card">
             <span class="material-icons" style="color:#4285f4">info</span>
-            <p>Al elegir, pegá el texto en Google y <b>tocá la cámara</b> para capturar la hoja.</p>
+            <p>Al elegir, pegá en Google y <b>tocá la cámara</b> para mostrar la hoja.</p>
         </div>
 
-        <div class="ads-container">
+        <div class="ads-wrapper">
             <p class="ads-label">Patrocinado por:</p>
-            <a href="https://angelestrada.com.ar/" target="_blank" rel="noopener noreferrer">
-                <img src="Logo.jpg" alt="Angel Estrada" class="ads-logo">
-            </a>
+            <div class="ads-box">
+                <a href="https://angelestrada.com.ar/" target="_blank" rel="noopener noreferrer">
+                    <img src="Logo.jpg" alt="Angel Estrada" class="ads-logo">
+                </a>
+            </div>
         </div>
 
-        <p class="footer">ID DE HOJA: <span id="hojaDisplay">...</span></p>
-        
+        <p class="footer">ID: <span id="hojaDisplay">...</span></p>
         <textarea id="copyText" style="position: absolute; left: -9999px;"></textarea>
     </div>
 
     <script>
-        // Obtener ID de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const hojaID = urlParams.get('hoja') || 'PROFESOR';
         document.getElementById('hojaDisplay').textContent = hojaID;
 
         function lanzar(tipo) {
-            // El prompt que pediste con "Hola" y la instrucción de la cámara
             let promptBase = `Hola. Responde siempre en español. Voy a usar la cámara para mostrarte mi hoja (ID: ${hojaID}). `;
             let instruccion = "";
-
             switch(tipo) {
-                case 'PROFESOR':
-                    instruccion = `IA Gemini actúa como profesor experto: analizá la imagen de la hoja y explicame el tema paso a paso de forma didáctica.`;
-                    break;
-                case 'RESUMEN':
-                    instruccion = `Analizá la imagen de la hoja y haceme un resumen conciso con los puntos clave más relevantes.`;
-                    break;
-                case 'PDF':
-                    instruccion = `Leé el texto de la imagen de la hoja y transcribilo de forma fiel, limpia y profesional.`;
-                    break;
-                case 'QUIZ':
-                    instruccion = `Analizá la imagen de la hoja y generá 3 preguntas de práctica con sus respuestas para evaluar lo aprendido.`;
-                    break;
+                case 'PROFESOR': instruccion = `IA Gemini actúa como profesor experto: analizá la imagen y explicame el tema paso a paso de forma didáctica.`; break;
+                case 'RESUMEN': instruccion = `Analizá la imagen y haceme un resumen conciso con los puntos clave.`; break;
+                case 'PDF': instruccion = `Leé el texto de la imagen y transcribilo de forma fiel y limpia.`; break;
+                case 'QUIZ': instruccion = `Analizá la imagen y generá 3 preguntas de práctica con respuestas para evaluar.`; break;
             }
-
             const promptFinal = promptBase + instruccion;
-            
-            // Función para copiar al portapapeles
             const textArea = document.getElementById('copyText');
             textArea.value = promptFinal;
             textArea.select();
             document.execCommand('copy');
-
-            // Lanzar a Google con udm=50 (Tu brújula ganadora para Modo IA)
-            const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50";
-            window.open(searchUrl, "_blank");
+            window.open("https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50", "_blank");
         }
     </script>
 
     <style>
-        /* CONFIGURACIÓN VISUAL DARK PREMIUM */
-        :root { 
-            --blue: #4285f4; --purple: #9b72cb; --green: #34a853; 
-            --dark: #0a0a0a; --card: #161616; --muted: #666; 
-        }
+        :root { --blue: #4285f4; --purple: #9b72cb; --green: #34a853; --dark: #0a0a0a; --card: #141414; --muted: #777; }
+        body { background-color: var(--dark); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; padding: 15px; box-sizing: border-box; }
         
-        body { 
-            background-color: var(--dark); 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; color: white; padding: 20px; box-sizing: border-box; 
-        }
+        /* Contenedor principal más compacto */
+        .container { background-color: var(--card); width: 100%; max-width: 360px; padding: 25px 20px; border-radius: 35px; border: 1px solid #222; box-shadow: 0 20px 40px rgba(0,0,0,0.6); text-align: center; }
 
-        .container { 
-            background-color: var(--card); width: 100%; max-width: 380px; 
-            padding: 35px 20px; border-radius: 40px; border: 1px solid #222; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8); text-align: center;
-        }
+        /* Encabezado más chico */
+        .live-header { margin-bottom: 15px; }
+        .live-icon { font-size: 2.5rem; color: var(--blue); margin-bottom: 5px; }
+        h1 { font-size: 1.3rem; margin: 0; font-weight: 800; }
+        .subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
 
-        .live-header { margin-bottom: 25px; }
-        .live-icon { font-size: 3rem; color: var(--blue); margin-bottom: 5px; }
-        h1 { font-size: 1.4rem; margin: 0; font-weight: 800; }
-        .subtitle { font-size: 0.8rem; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Botones de menú interactivos */
-        .action-btn { 
-            width: 100%; padding: 18px; border: none; border-radius: 20px; margin-bottom: 12px;
-            display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;
-            text-align: left; background: #222; color: white; border: 1px solid #333;
-        }
-        .action-btn:active { transform: scale(0.97); }
-        .action-btn .material-icons { font-size: 2rem; }
+        /* Botones más delgados */
+        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; text-align: left; background: #222; color: white; border: 1px solid #2a2a2a; }
+        .action-btn:active { transform: scale(0.98); background: #333; }
+        .action-btn .material-icons { font-size: 1.8rem; }
         .btn-text { display: flex; flex-direction: column; }
-        .btn-text b { font-size: 0.95rem; }
-        .btn-text span { font-size: 0.75rem; color: #888; }
-
-        /* Diferenciación de colores */
+        .btn-text b { font-size: 0.9rem; }
+        .btn-text span { font-size: 0.7rem; color: #999; }
         .btn-expert .material-icons { color: var(--blue); }
         .btn-summary .material-icons { color: #fbbc05; }
         .btn-pdf .material-icons { color: #ea4335; }
         .btn-quiz .material-icons { color: var(--green); }
 
-        .info-card { 
-            margin: 20px 0; background: #0a0a0a; padding: 15px; 
-            border-radius: 20px; border: 1px solid #222; 
-            display: flex; align-items: center; gap: 12px; 
-        }
-        .info-card p { margin: 0; font-size: 0.75rem; color: #777; line-height: 1.4; text-align: left; }
+        /* Info card compacta */
+        .info-card { margin: 15px 0; background: rgba(66, 133, 244, 0.1); padding: 12px; border-radius: 15px; border: 1px solid rgba(66, 133, 244, 0.2); display: flex; align-items: center; gap: 10px; }
+        .info-card p { margin: 0; font-size: 0.7rem; color: #ccc; line-height: 1.3; text-align: left; }
 
-        /* Publicidad */
-        .ads-container { 
-            margin-top: 25px; padding: 20px; border-top: 1px solid #222; 
-            background: rgba(255,255,255,0.02); border-radius: 0 0 40px 40px;
-            display: flex; flex-direction: column; align-items: center;
+        /* NUEVA SECCIÓN DE PUBLICIDAD SUAVIZADA */
+        .ads-wrapper { margin-top: 20px; }
+        .ads-label { font-size: 0.6rem; color: #555; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        
+        /* La "cajita" alrededor del logo para bajar el contraste */
+        .ads-box {
+            background: rgba(255, 255, 255, 0.05); /* Fondo apenas claro */
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2); /* Sombra interna para profundidad */
         }
-        .ads-label { font-size: 0.6rem; color: #444; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-        .ads-logo { width: 100%; max-width: 180px; height: auto; transition: 0.3s; opacity: 0.9; }
-        .ads-logo:hover { opacity: 1; transform: scale(1.03); }
+        .ads-logo { width: 100%; max-width: 160px; height: auto; opacity: 0.9; border-radius: 8px; transition: 0.3s; }
+        .ads-logo:hover { opacity: 1; transform: scale(1.02); }
 
-        .footer { margin-top: 25px; font-size: 0.65rem; color: #333; text-transform: uppercase; letter-spacing: 3px; }
+        .footer { margin-top: 20px; font-size: 0.6rem; color: #444; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </body>
 </html>
