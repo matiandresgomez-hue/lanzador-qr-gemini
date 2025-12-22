@@ -62,25 +62,29 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const hojaID = urlParams.get('hoja') || 'PROFESOR';
+        // Ahora el valor por defecto es RIVADAVIA
+        const hojaID = urlParams.get('hoja') || 'RIVADAVIA';
         document.getElementById('hojaDisplay').textContent = hojaID;
 
         function lanzar(tipo) {
-            let promptBase = `Hola. Responde siempre en español. Voy a usar la cámara para mostrarte mi hoja (ID: ${hojaID}). `;
+            // El prompt ahora dice: "Mi hoja RIVADAVIA" (o el ID que traiga el link)
+            let promptBase = `Hola. Responde siempre en español. Voy a usar la cámara para mostrarte Mi hoja ${hojaID}. `;
             let instruccion = "";
+            
             switch(tipo) {
                 case 'PROFESOR': instruccion = `IA Gemini actúa como profesor experto: analizá la imagen y explicame el tema paso a paso de forma didáctica.`; break;
                 case 'RESUMEN': instruccion = `Analizá la imagen y haceme un resumen conciso con los puntos clave.`; break;
                 case 'PDF': instruccion = `Leé el texto de la imagen y transcribilo de forma fiel y limpia.`; break;
                 case 'QUIZ': instruccion = `Analizá la imagen y generá 3 preguntas de práctica con respuestas para evaluar.`; break;
             }
+            
             const promptFinal = promptBase + instruccion;
             const textArea = document.getElementById('copyText');
             textArea.value = promptFinal;
             textArea.select();
             document.execCommand('copy');
             
-            // udm=50 para entrar directo a la pestaña IA/Gemini
+            // udm=50 para entrar directo a la pestaña IA/Gemini en Chrome
             window.open("https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50", "_blank");
         }
     </script>
