@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Control Center | Pro</title>
+    <title>IA Control Center | Edición Especial</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
@@ -35,7 +35,7 @@
             <span class="material-icons">picture_as_pdf</span>
             <div class="btn-text">
                 <b>TRANSCRIBIR A TEXTO</b>
-                <span>Pasar a limpio para guardar/imprimir</span>
+                <span>Pasar a limpio para guardar o imprimir</span>
             </div>
         </button>
 
@@ -55,7 +55,7 @@
         <div class="ads-container">
             <p class="ads-label">Patrocinado por:</p>
             <a href="https://angelestrada.com.ar/" target="_blank" rel="noopener noreferrer">
-                <img src="image_0.png" alt="Angel Estrada" class="ads-logo">
+                <img src="Logo.jpg" alt="Angel Estrada" class="ads-logo">
             </a>
         </div>
 
@@ -65,45 +65,47 @@
     </div>
 
     <script>
+        // Obtener ID de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const hojaID = urlParams.get('hoja') || 'PROFESOR';
         document.getElementById('hojaDisplay').textContent = hojaID;
 
         function lanzar(tipo) {
-            // Prompt que integra "Hola", Idioma y Orden de Cámara
+            // El prompt que pediste con "Hola" y la instrucción de la cámara
             let promptBase = `Hola. Responde siempre en español. Voy a usar la cámara para mostrarte mi hoja (ID: ${hojaID}). `;
             let instruccion = "";
 
             switch(tipo) {
                 case 'PROFESOR':
-                    instruccion = `IA Gemini actúa como profesor experto: analizá la imagen de la hoja y explicame el tema paso a paso.`;
+                    instruccion = `IA Gemini actúa como profesor experto: analizá la imagen de la hoja y explicame el tema paso a paso de forma didáctica.`;
                     break;
                 case 'RESUMEN':
-                    instruccion = `Analizá la imagen de la hoja y haceme un resumen corto con los puntos clave.`;
+                    instruccion = `Analizá la imagen de la hoja y haceme un resumen conciso con los puntos clave más relevantes.`;
                     break;
                 case 'PDF':
-                    instruccion = `Leé el texto de la imagen de la hoja y transcribilo de forma limpia y profesional para un documento.`;
+                    instruccion = `Leé el texto de la imagen de la hoja y transcribilo de forma fiel, limpia y profesional.`;
                     break;
                 case 'QUIZ':
-                    instruccion = `Analizá la imagen de la hoja y generá 3 preguntas de práctica para ver si entendí.`;
+                    instruccion = `Analizá la imagen de la hoja y generá 3 preguntas de práctica con sus respuestas para evaluar lo aprendido.`;
                     break;
             }
 
             const promptFinal = promptBase + instruccion;
             
-            // Lógica de copiado automático
+            // Función para copiar al portapapeles
             const textArea = document.getElementById('copyText');
             textArea.value = promptFinal;
             textArea.select();
             document.execCommand('copy');
 
-            // Lanzamiento a Chrome con udm=50 (Modo IA)
+            // Lanzar a Google con udm=50 (Tu brújula ganadora para Modo IA)
             const searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(promptFinal) + "&udm=50";
             window.open(searchUrl, "_blank");
         }
     </script>
 
     <style>
+        /* CONFIGURACIÓN VISUAL DARK PREMIUM */
         :root { 
             --blue: #4285f4; --purple: #9b72cb; --green: #34a853; 
             --dark: #0a0a0a; --card: #161616; --muted: #666; 
@@ -122,13 +124,12 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.8); text-align: center;
         }
 
-        /* Encabezado */
         .live-header { margin-bottom: 25px; }
         .live-icon { font-size: 3rem; color: var(--blue); margin-bottom: 5px; }
         h1 { font-size: 1.4rem; margin: 0; font-weight: 800; }
         .subtitle { font-size: 0.8rem; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Botones de menú */
+        /* Botones de menú interactivos */
         .action-btn { 
             width: 100%; padding: 18px; border: none; border-radius: 20px; margin-bottom: 12px;
             display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;
@@ -140,13 +141,12 @@
         .btn-text b { font-size: 0.95rem; }
         .btn-text span { font-size: 0.75rem; color: #888; }
 
-        /* Colores de Iconos */
+        /* Diferenciación de colores */
         .btn-expert .material-icons { color: var(--blue); }
         .btn-summary .material-icons { color: #fbbc05; }
         .btn-pdf .material-icons { color: #ea4335; }
         .btn-quiz .material-icons { color: var(--green); }
 
-        /* Tarjeta de Instrucción */
         .info-card { 
             margin: 20px 0; background: #0a0a0a; padding: 15px; 
             border-radius: 20px; border: 1px solid #222; 
@@ -154,14 +154,13 @@
         }
         .info-card p { margin: 0; font-size: 0.75rem; color: #777; line-height: 1.4; text-align: left; }
 
-        /* Sección de Publicidad */
+        /* Publicidad */
         .ads-container { 
             margin-top: 25px; padding: 20px; border-top: 1px solid #222; 
             background: rgba(255,255,255,0.02); border-radius: 0 0 40px 40px;
             display: flex; flex-direction: column; align-items: center;
         }
         .ads-label { font-size: 0.6rem; color: #444; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-        /* CSS para controlar el tamaño del logo */
         .ads-logo { width: 100%; max-width: 180px; height: auto; transition: 0.3s; opacity: 0.9; }
         .ads-logo:hover { opacity: 1; transform: scale(1.03); }
 
